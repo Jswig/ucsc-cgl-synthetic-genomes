@@ -15,7 +15,8 @@ Requires the `conda` CLI. Install using
 
 ```sh
 conda env create -f wf.yml &&
-conda activate synth-genes
+conda activate synth-genes &&
+python -m ipykernel install --user --name synth-genes
 ```
 
 ### 2. Docker image
