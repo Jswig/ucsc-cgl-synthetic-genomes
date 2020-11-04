@@ -2,9 +2,8 @@ steps:
 - id: "filter_input"
   uses: "docker://biocontainers/bcftools:v1.5_cv3"
   runs: ["sh"]
+  args: ["src/filter_input/filter.sh", "BreastCancer.shuffle.vcf"]
 
 - id: "make_sequences"
   uses: "docker://ensemblorg/ensembl-vep:release_101.0"
   runs: ["sh"]
-
-- id: "model"
