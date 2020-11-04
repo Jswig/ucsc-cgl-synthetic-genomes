@@ -2,21 +2,13 @@
 
 *Anders Poirel*
 
-Using GANs to synthesize genomes
-
 ## Dependencies
 
-Use one of those two possibilities to install
-required dependencies
+- [Popper](https://popper.readthedocs.io/en/latest/)
+- Docker
 
-### 1. conda 
-
-Requires the `conda` CLI. Install using
+## Running the workflow
 
 ```sh
-conda env create -f wf.yml &&
-conda activate synth-genes &&
-python -m ipykernel install --user --name synth-genes
+popper run -f wf.yml 
 ```
-
-### 2. Docker image
