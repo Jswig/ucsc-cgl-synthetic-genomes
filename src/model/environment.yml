@@ -1,0 +1,12 @@
+name:
+  synth-genes
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.8
+  - scikit-allel
+  - jupyterlab
+  - seaborn
+  - pandas
+  - pytorch
