@@ -132,4 +132,6 @@ dmypy.json
 # Data
 *.vcf
 *.vcf.gz
+*.gff3
+*.gff3.gz
 *.csv
