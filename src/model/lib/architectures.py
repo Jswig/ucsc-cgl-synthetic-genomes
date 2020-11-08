@@ -9,7 +9,7 @@ class ResidualBlock(nn.Module):
         self.conv_1 = nn.Conv1d(in_channels=d_in, out_channels=d_out, kernel_size=5, padding = 2)
         self.relu_2 = relu()
         self.conv_2 = nn.Conv1d(in_channels=d_in, out_channels=d_out, kernel_size=5, padding = 2)
-        # bias not need, already present by default in Conv1d()
+        # bias not needed, already present by default in Conv1d()
         
     def forward(self, x):
         y = self.relu_1(x)
@@ -24,7 +24,7 @@ class Generator(nn.Module):
         self.linear = nn.Linear(100, 100*seq_len)
         self.res = []
         for i in range(5):
-            self.res.append(ResidualBlock(100, 100, nn.ReLU))
+            self.res.append(ResidualBlock(100, 100, relu=nn.ReLU))
         self.conv_f = nn.Conv1d(in_channels=100, out_channels=4, kernel_size=1)
         
         self.batch_size = batch_size
