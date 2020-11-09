@@ -1,6 +1,7 @@
 steps:
-- id: "make_sequences"
+- id: "vcf_to_haplotype"
   uses: "docker://ensemblorg/ensembl-vep:release_101.0"
   runs: ["sh"]
+  args: ["get_haplotype.sh"]
   options:
     user: 31000

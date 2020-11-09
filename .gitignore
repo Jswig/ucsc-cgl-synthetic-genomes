@@ -133,3 +133,6 @@ dmypy.json
 *.gff3
 *.gff3.gz
 *.csv
+
+# vscode
+*.vscode/*
