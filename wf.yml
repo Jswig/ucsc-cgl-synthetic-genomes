@@ -2,3 +2,5 @@ steps:
 - id: "make_sequences"
   uses: "docker://ensemblorg/ensembl-vep:release_101.0"
   runs: ["sh"]
+  options:
+    user: 31000
