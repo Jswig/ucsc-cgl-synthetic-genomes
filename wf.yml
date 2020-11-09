@@ -10,12 +10,14 @@ steps:
   uses: "./src/haplotype_to_sequence/"
   runs: ["sh"]
   options:
+    name: "haplotype_to_sequence"
     user: 31000
 
 - id: "notebook"
   uses: "docker://continuumio/anaconda:2019"
   runs: ["sh"]
   options:
+    name: "notebook"
     user: 3100
     ports:
       8787: 8787
