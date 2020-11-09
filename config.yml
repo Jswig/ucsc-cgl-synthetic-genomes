@@ -1,7 +1,0 @@
-engine:
-  name: docker
-  options:
-    ports: 
-      8888: 8888
-    user: 
-      30100 
