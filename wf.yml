@@ -11,5 +11,11 @@ steps:
   runs: ["sh"]
   options:
     user: 31000
+
+- id: "notebook"
+  uses: "docker://continuumio/anaconda:2019"
+  runs: ["sh"]
+  options:
+    user: 3100
     ports:
       8787: 8787
