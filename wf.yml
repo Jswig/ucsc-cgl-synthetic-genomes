@@ -5,3 +5,9 @@ steps:
   args: ["get_haplotype.sh"]
   options:
     user: 31000
+
+- id: "haplotype_to_sequence"
+  uses: "./src/haplotype_to_sequence/"
+  runs: ["sh"]
+  options:
+    user: 31000

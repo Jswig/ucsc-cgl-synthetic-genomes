@@ -1,4 +1,5 @@
 FROM continuumio/miniconda3:4.8.2
+LABEL description="Image for pytorch model"
 
 ENV PYTHONDONTWRITEBYTECODE=true 
 
