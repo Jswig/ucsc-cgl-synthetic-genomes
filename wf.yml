@@ -14,7 +14,7 @@ steps:
     user: 31000
 
 - id: "notebook"
-  uses: "docker://continuumio/anaconda:2019"
+  uses: "continuumio/anaconda:2019.10"
   runs: ["sh"]
   options:
     name: "notebook"
