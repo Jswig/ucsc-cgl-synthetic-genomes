@@ -11,3 +11,5 @@ steps:
   runs: ["sh"]
   options:
     user: 31000
+    ports:
+      8888: 8888
