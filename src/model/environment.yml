@@ -1,5 +1,5 @@
 name:
-  synth-genes-model
+  base
 channels:
   - pytorch
   - conda-forge

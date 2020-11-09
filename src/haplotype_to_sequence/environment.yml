@@ -1,5 +1,5 @@
 name:
-  synth-genes-sequences
+  base
 channels:
   - conda-forge
 dependencies:
