@@ -21,3 +21,15 @@ What is biologically plausible ?
 - location of mutations:
     - functional domain or not
 - cohort frequency: compare to frequency in the specific dataset
+
+
+# 16-11-2020
+
+
+- Try with just SNPs (easy to code)
+    - makes model evaluation easier 
+
+- Try FASTARefMaker, if does not work just modify reference with SNPs from files
+
+- It's biologically plausible to model each of a person's haplotypes independantly
+    - just draw twice from the generator for each person
