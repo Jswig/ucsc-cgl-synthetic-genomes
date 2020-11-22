@@ -12,16 +12,8 @@ steps:
   options:
     user: 31000
 
-- id: "notebook"
-  uses: "docker://continuumio/anaconda:2019.10"
-  runs: ["sh"]
-  options:
-    user: 3100
-    ports:
-      8787: 8787
-
 - id: "gatk"
   uses: "docker://broadinstitute/gatk:4.1.9.0"
-  runs: "sh"
+  runs: ["sh"]
   options:
     user: 3100
