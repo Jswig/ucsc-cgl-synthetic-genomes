@@ -3,7 +3,7 @@ steps:
   uses:
   runs: ["sh"]
   options:
-    user: 1000
+    user: 30100   
 
 - id: "seperate_samples"
   uses: "docker://biocontainers/bcftools:v1.9-1-deb_cv1"
@@ -11,15 +11,15 @@ steps:
   args: [
     "src/seperate_samples/seperate_samples.sh",
     "data/raw/brca1.vcf",
-    "data/interim/bcra1",
+    "data/interim/bcra1_samples",
     "data/raw/brca2.vcf",
-    "data/interim/brca2"
+    "data/interim/brca2_samples"
   ]
   options: 
-    user: 1000
+    user: 30100
 
 - id: "extract_sequences"
   uses: "docker://broadinstitute/gatk:4.1.9.0"
   runs: ["sh"]
   options:
-    user: 1000
+    user: 30100
