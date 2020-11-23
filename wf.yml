@@ -1,16 +1,10 @@
 steps:
-- id: "index_samples"
-  uses:
-  runs: ["sh"]
-  options:
-    user: 30100   
-
 - id: "seperate_samples"
   uses: "docker://biocontainers/bcftools:v1.9-1-deb_cv1"
   runs: ["sh"]
   args: [
     "src/seperate_samples/seperate_samples.sh",
-    "data/raw/brca1.vcf",
+    "data/raw/brca1.vcf ",
     "data/interim/bcra1_samples",
     "data/raw/brca2.vcf",
     "data/interim/brca2_samples"
