@@ -5,7 +5,7 @@ steps:
   args: [
     "src/seperate_samples/seperate_samples.sh",
     "data/raw/brca1.vcf ",
-    "data/interim/bcra1_samples",
+    "data/interim/brca1_samples",
     "data/raw/brca2.vcf",
     "data/interim/brca2_samples"
   ]
