@@ -3,8 +3,7 @@
 extract_samples() {
     for sample in `bcftools query -l $1` 
     do
-        bcftools view -c1 -Oz -s $sample -o "$2/$sample.vcf" $1
-    done
+        bcftools view -c1 -s $sample  -Ov
 }
 
 extract_samples $1 $2
