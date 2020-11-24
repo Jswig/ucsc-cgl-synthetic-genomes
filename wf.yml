@@ -12,7 +12,11 @@ steps:
   options: 
     user: 30100
 
+<<<<<<< HEAD
 - id: "extract_sequences"
+=======
+- id: "gatk"
+>>>>>>> 1a2803a6b195fabc9e45665069a542a48f674679
   uses: "docker://broadinstitute/gatk:4.1.9.0"
   runs: ["sh"]
   options:
