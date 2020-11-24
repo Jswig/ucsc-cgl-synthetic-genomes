@@ -14,7 +14,7 @@ extract_sequences() {
             -R $4 \ 
             -O "$3$sample_name.fasta" \ 
             -L $2 \
-            -V $sample \
+            -V $sample 
     done 
 }
 
@@ -24,5 +24,10 @@ then
     exit 1
 fi
 
+gatk CreateSequenceDictionary -R $7
+samtools faidx $7
+
 extract_sequences $1 $2 $3 $7
 extract_sequences $4 $5 $6 $7
+
+
