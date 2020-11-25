@@ -1,23 +1,12 @@
 steps:
-- id: "seperate_samples"
-  uses: "docker://biocontainers/bcftools:v1.9-1-deb_cv1"
+- id: "preprocessing"
+  uses: "./preprocessing"
   runs: ["sh"]
-  args: [
-    "src/seperate_samples/seperate_samples.sh",
-    "data/raw/brca1.vcf ",
-    "data/interim/brca1_samples",
-    "data/raw/brca2.vcf",
-    "data/interim/brca2_samples"
-  ]
-  options: 
+  options:
     user: 30100
 
-<<<<<<< HEAD
-- id: "extract_sequences"
-=======
-- id: "gatk"
->>>>>>> 1a2803a6b195fabc9e45665069a542a48f674679
-  uses: "docker://broadinstitute/gatk:4.1.9.0"
+- id: "model"
+  uses: "./model"
   runs: ["sh"]
   options:
     user: 30100

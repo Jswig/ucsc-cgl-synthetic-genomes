@@ -1,0 +1,11 @@
+name:
+  preprocessing
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.8
+  - scikit-allel=1.3.2
+  - ipython
+  - pandas=1.1
+  - biopython=1.78 

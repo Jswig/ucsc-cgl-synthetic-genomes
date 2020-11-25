@@ -12,3 +12,8 @@ BRCA 2 location
 ```
 chr13:32,315,086-32,400,266
 ```
+
+reference genomes
+```
+GRCh38_latest_genomic.fna
+```
