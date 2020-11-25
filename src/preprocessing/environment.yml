@@ -1,5 +1,5 @@
 name:
-  preprocessing
+  base
 channels:
   - conda-forge
   - bioconda
