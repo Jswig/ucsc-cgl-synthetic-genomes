@@ -1,12 +1,12 @@
 steps:
 - id: "preprocessing"
-  uses: "./preprocessing"
+  uses: "./src/preprocessing"
   runs: ["sh"]
   options:
     user: 30100
 
 - id: "model"
-  uses: "./model"
+  uses: "./src/model"
   runs: ["sh"]
   options:
     user: 30100
