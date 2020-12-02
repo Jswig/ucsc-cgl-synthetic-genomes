@@ -1,4 +1,18 @@
 steps:
+- id: "dataset"
+  uses: "docker://ubuntu:20.04"
+  runs: ["sh"]
+  args: ["src/dataset/download_data.sh"]
+  options:
+    user: 30100
+
+- id: "sample_names"
+  uses: "docker://biocontainers/bcftools:v1.9-1-deb_cv1"
+  runs: ["sh"]
+  args: ["src/sample_names/extract_names.sh"]
+  options:
+    user: 30100
+
 - id: "preprocessing"
   uses: "./src/preprocessing"
   runs: ["sh"]
