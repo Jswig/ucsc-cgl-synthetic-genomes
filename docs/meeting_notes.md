@@ -33,3 +33,11 @@ What is biologically plausible ?
 
 - It's biologically plausible to model each of a person's haplotypes independantly
     - just draw twice from the generator for each person
+
+# 12-1-2020
+
+We treat the haplotypes as independant. As 
+
+
+Hyperparameter tuning for the GAN:
+- tune using prior knowledge of expected parameters

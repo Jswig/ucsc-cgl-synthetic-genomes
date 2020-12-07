@@ -1,6 +1,7 @@
 # Data preprocessing notes
 
 
+
 ## Gene locations
 
 BRCA 1 location
@@ -17,3 +18,12 @@ reference genomes
 ```
 GRCh38_latest_genomic.fna
 ```
+
+## Storing data
+
+Using default strings data is about 900kb/sample
+Using `categorical` dtypes reduces this to 100kb
+Can probably do better with numpy arrays? --> not really since `categorical` is 
+really an integer
+Advantages to keeping everything in pandas for one-hot encoding?
+Even the csv shoulbe be reasonable
