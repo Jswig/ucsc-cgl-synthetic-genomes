@@ -6,7 +6,7 @@ from Bio import SeqIO
 
 def extract_from_vcf(reference_fasta: str, variants_vcf: str, start: int, end: int):
     
-    reference = SeqIO.parse(reference_fasta, "fasta")
+    reference = list(SeqIO.parse(reference_fasta, "fasta"))
     variants = allel.read_vcf(variants_vcf, fields=["POS", "REF", "ALT"])
 
     reference_seq = str(reference.seq)
