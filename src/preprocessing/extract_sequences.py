@@ -55,7 +55,7 @@ if __name__ == "__main__":
     if not os.path.isfile('data/interim/brca1_seqs.feather'):
         extract_from_vcf(
             reference_fasta="data/Homo_sapiens.GRCh38.dna.chromosome.17.fa", 
-            variants_vcf="data/raw/bcra1.vcf",
+            variants_vcf="data/raw/brca1.vcf",
             sample_ids="data/interim/sample_names.txt",
             output="data/interim/brca1_seqs.feather",
             start=43044295,
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     if not os.path.isfile('data/interim/brca2_seqs.feather'):   
         extract_from_vcf(
             reference_fasta="data/Homo_sapiens.GRCh38.dna.chromosome.13.fa", 
-            variants_vcf="data/raw/bcra2.vcf",
+            variants_vcf="data/raw/brca2.vcf",
             sample_ids="data/interim/sample_names.txt",
             output="data/interim/brca2_seqs.feather",
             start=32315086,
