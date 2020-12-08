@@ -15,12 +15,19 @@ steps:
 
 - id: "preprocessing"
   uses: "./src/preprocessing"
-  runs: ["sh"]
+  runs: ["python"]
+  args: ["src/preprocessing/extract_sequences.py"]
   options:
     user: 30100
 
 - id: "model"
   uses: "./src/model"
+  runs: ["sh"]
+  options:
+    user: 30100
+
+- id: "evaluation"
+  uses: "sh"
   runs: ["sh"]
   options:
     user: 30100
