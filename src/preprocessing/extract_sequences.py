@@ -45,6 +45,7 @@ def extract_from_vcf(
 
         seq = pd.Series(seq, dtype='categorical')
         seqs.append(seq)
+        print('Completed sample {}\n'.format(j))
 
     seqs_df = pd.DataFrame(seqs) # as feather is columnar prefer taking transpose after loading
     seqs_df.to_feather(output)
