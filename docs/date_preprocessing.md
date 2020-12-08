@@ -1,7 +1,6 @@
 # Data preprocessing notes
 
 
-
 ## Gene locations
 
 BRCA 1 location
@@ -26,4 +25,4 @@ Using `categorical` dtypes reduces this to 100kb
 Can probably do better with numpy arrays? --> not really since `categorical` is 
 really an integer
 Advantages to keeping everything in pandas for one-hot encoding?
-Even the csv shoulbe be reasonable
+Even the csv should be reasonable
