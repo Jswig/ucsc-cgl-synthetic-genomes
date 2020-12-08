@@ -34,6 +34,7 @@ def extract_from_vcf(
 
     haplos = pd.concat([variants, haplo_1, haplo_2], axis=1)
     haplos = haplos[(haplos['REF'].str.len() == 1) & (haplos['ALT_1'].str.len() == 1)]
+    haplos = haplos.reset_index() # reset index after filtering 
 
     # iterate over all haplotype columns, building the fulls sequence for each
     seqs = []
