@@ -39,9 +39,10 @@ def extract_from_vcf(
     seqs = []
     for j in range(3, haplos.shape[1]):
         seq = list(reference_gene) # cannot modify a string
-        for i in range(len(haplos)):
+        for i in range(len(haplos)):    
             if haplos.iloc[i,j] == 1:
-                seq[haplos.loc[i, 'POS']] = haplos.loc[i, 'ALT_1']
+                alt = haplos.loc[i, 'ALT_1']
+                seq[haplos.loc[i, 'POS']] = alt
 
         seq = pd.Series(seq, dtype='categorical')
         seqs.append(seq)
