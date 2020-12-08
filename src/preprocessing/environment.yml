@@ -8,4 +8,5 @@ dependencies:
   - biopython=1.78 
   - ipython=7.18.1
   - pandas=1.1.3
+  - pyarrow=2.0.0
   - scikit-allel=1.3.2

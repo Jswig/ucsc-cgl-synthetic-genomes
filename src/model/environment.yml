@@ -9,4 +9,5 @@ dependencies:
   - ipython=7.18.1
   - pandas=1.1.3
   - pytorch=1.7.0
+  - pyarrow=2.0.0
   - seaborn=0.11.0
