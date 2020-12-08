@@ -38,7 +38,7 @@ def extract_from_vcf(
 
     # iterate over all haplotype columns, building the fulls sequence for each
     seqs = []
-    for j in range(3, haplos.shape[1]):
+    for j in range(3, 10):
         seq = list(reference_gene) # cannot modify a string
         for i in range(len(haplos)):    
             if haplos.iloc[i,j] == 1:
