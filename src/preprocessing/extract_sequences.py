@@ -3,11 +3,11 @@ import pandas as pd
 import allel
 from Bio import SeqIO
 
-
 def extract_from_vcf(
     reference_fasta: str, 
     variants_vcf: str, 
     sample_ids: str, 
+    output_name: str,
     start: int, 
     end: int
 ):
@@ -17,7 +17,6 @@ def extract_from_vcf(
 
     ids = pd.read_csv(sample_ids, header=None)
     ids = ids[0].tolist()
-
 
     variants = (allel
         .vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
@@ -34,14 +33,17 @@ def extract_from_vcf(
     haplos = pd.concat([variants, haplo_1, haplo_2], axis=1)
     haplos = haplos[(haplos['REF'].str.len() == 1) & (haplos['ALT_1'].str.len() == 1)]
 
-    # iterate over all haplotype columns
+    # iterate over all haplotype columns, building the fulls sequence for each
+    seqs = []
     for j in range(3, haplos.shape[1]):
         seq = list(reference_seq) # cannot modify a string
         for i in range(len(haplos)):
             if haplos.iloc[i,j] == 1:
                 seq[haplos.loc[i, 'POS']] = haplos.loc[i, 'ALT_1']
-        
-    # TODO: dump to file
+            seq = pd.Series(seq, dtype='categorical')
+            seqs.append(seq)
+    seqs_df = pd.DataFrame(seqs).T
+    seqs_df.to_feather(output_name)
 
 if __name__ == "__main__":
 
@@ -49,6 +51,7 @@ if __name__ == "__main__":
         reference_fasta="data/Homo_sapiens.GRCh38.dna.chromosome.17.fa", 
         variants_vcf="data/raw/bcra1.vcf",
         sample_ids="data/interim/sample_names.txt",
+        output="data/interim/brca1_seqs.feather",
         start=43044295,
         end=43170246,
     )
@@ -56,6 +59,7 @@ if __name__ == "__main__":
         reference_fasta="data/Homo_sapiens.GRCh38.dna.chromosome.13.fa", 
         variants_vcf="data/raw/bcra2.vcf",
         sample_ids="data/interim/sample_names.txt",
+        output="data/interim/brca2_seqs.feather"
         start=32315086,
         end=32400267,
     )
