@@ -13,7 +13,7 @@ def extract_from_vcf(
     start: int, 
     end: int
 ):
-    reference = Bio.SeqIO.read(reference_fasta, "fasta")
+    reference = Bio.SeqIO.read(reference_fasta, 'fasta')
     reference_seq = str(reference.seq)
     reference_gene = reference_seq[start:end]
 
@@ -27,7 +27,7 @@ def extract_from_vcf(
     # shift POS to start from 0 in the gene's sequence
     variants['POS'] = variants['POS'] - start
 
-    genotypes = allel.read_vcf(variants_vcf, fields=['POS'], samples=ids)
+    genotypes = allel.read_vcf(variants_vcf, fields=['calldata/GT'], samples=ids)
     genotypes = genotypes['calldata/GT']
     haplo_1 = pd.DataFrame(genotypes[:,:,0])
     haplo_2 = pd.DataFrame(genotypes[:,:,1])
@@ -50,24 +50,24 @@ def extract_from_vcf(
     seqs_df.to_feather(output)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     if not os.path.isfile('data/interim/brca1_seqs.feather'):
         extract_from_vcf(
-            reference_fasta="data/Homo_sapiens.GRCh38.dna.chromosome.17.fa", 
-            variants_vcf="data/raw/brca1.vcf",
-            sample_ids="data/interim/sample_names.txt",
-            output="data/interim/brca1_seqs.feather",
+            reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.17.fa', 
+            variants_vcf='data/raw/brca1.vcf',
+            sample_ids='data/interim/sample_names.txt',
+            output='data/interim/brca1_seqs.feather',
             start=43044295,
             end=43170246,
         )
 
     if not os.path.isfile('data/interim/brca2_seqs.feather'):   
         extract_from_vcf(
-            reference_fasta="data/Homo_sapiens.GRCh38.dna.chromosome.13.fa", 
-            variants_vcf="data/raw/brca2.vcf",
-            sample_ids="data/interim/sample_names.txt",
-            output="data/interim/brca2_seqs.feather",
+            reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.13.fa', 
+            variants_vcf='data/raw/brca2.vcf',
+            sample_ids='data/interim/sample_names.txt',
+            output='data/interim/brca2_seqs.feather',
             start=32315086,
             end=32400267,
         )
