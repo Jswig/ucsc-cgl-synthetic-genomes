@@ -41,3 +41,25 @@ We treat the haplotypes as independant. As
 
 Hyperparameter tuning for the GAN:
 - tune using prior knowledge of expected parameters
+- 
+
+
+# 7-12-2020
+
+Model evaluation:
+
+- Does it preserve intron/exon structure with splice sites?
+    - MaxEntScan to detect number of splice sites
+        - needs GATK to get data back in variant calling format
+    - are functional domains conserved (just compare regions for equality)
+        - also should be in variant calling format
+    - edit distance 
+    - are both variants dysfunctional (future work!)
+    - ethnicity (is the variant similar to that from the population from that ethnicity) (future work!)
+
+How many unique genes does the network generate?
+
+The code can incorporate simple subsnititions easily (1 -> n or n->1)
+
+Other variant calling tool: [hail](https://hail.is/docs/0.2/genetics/hail.genetics.Call.html)
+- use relatedness tool in hail [link](https://hail.is/docs/0.2/methods/relatedness.html)

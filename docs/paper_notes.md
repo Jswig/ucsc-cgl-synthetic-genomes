@@ -84,3 +84,9 @@ DP-AuGM is effective at defending against GAN attacks
 Use MNIST dataset and hospital "tabular" data, but there is evidence that these
 models do not perform well for discrete sequences --> maybe approach in that paper 
 is not that useful
+
+
+---
+
+**functional domains:** parts of the gene that code for "irreplaceable"
+parts of the protein
