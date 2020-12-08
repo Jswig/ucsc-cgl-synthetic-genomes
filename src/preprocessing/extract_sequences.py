@@ -45,7 +45,7 @@ def extract_from_vcf(
                 alt = haplos.loc[i, 'ALT_1']
                 seq[haplos.loc[i, 'POS']] = alt
 
-        seq = pd.Series(seq, dtype='categorical')
+        seq = pd.Series(seq, dtype='category')
         seqs.append(seq)
         print('Completed sample {}\n'.format(j))
 
