@@ -38,7 +38,7 @@ def extract_from_vcf(
 
     # iterate over all haplotype columns, building the fulls sequence for each
     seqs = []
-    for j in range(3, 10):
+    for j in range(3, haplos.shape[1]):
         seq = list(reference_gene) # cannot modify a string
         for i in range(len(haplos)):    
             if haplos.iloc[i,j] == 1:
@@ -61,7 +61,7 @@ if __name__ == '__main__':
             reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.17.fa', 
             variants_vcf='data/raw/brca1.vcf',
             sample_ids='data/interim/sample_names.txt',
-            output='data/interim/brca1_seqs.feather',
+            output='data/processed/brca1_seqs.feather',
             start=43044295,
             end=43170246,
         )
@@ -71,7 +71,7 @@ if __name__ == '__main__':
             reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.13.fa', 
             variants_vcf='data/raw/brca2.vcf',
             sample_ids='data/interim/sample_names.txt',
-            output='data/interim/brca2_seqs.feather',
+            output='data/processed/brca2_seqs.feather',
             start=32315086,
             end=32400267,
         )
