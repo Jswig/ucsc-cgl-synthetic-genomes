@@ -50,6 +50,7 @@ def extract_from_vcf(
         print('Completed sample {}\n'.format(j))
 
     seqs_df = pd.DataFrame(seqs) # as feather is columnar prefer taking transpose after loading
+    seqs_df.columns = seqs_df.columns.astype(str)
     seqs_df.to_feather(output)
 
 
