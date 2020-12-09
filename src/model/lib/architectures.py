@@ -46,7 +46,7 @@ class Discriminator(nn.Module):
         self.conv_in = nn.Conv1d(in_channels=4, out_channels=100, kernel_size=1)
         self.resblocks = []
         for _ in range(5):
-            self.resblocks.append(ResidualBlock(100, 100, relu=nn.ReLU))
+            self.resblocks.append(ResidualBlock(100, 100, relu=nn.LeakyReLU))
         self.linear_out = nn.Linear(in_features=100*seq_len, out_features=1)
         
         self.seq_len = seq_len
