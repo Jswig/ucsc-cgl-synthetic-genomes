@@ -21,7 +21,7 @@ class BRCADataset(Dataset):
             .get_dummies(self.sequences.iloc[idx,:])
             .values 
             .astype(float)
-            .reshape(newshape=(1,4,self.seq_length))
+            .reshape(newshape=(1,4,self.seq_len))
         )
         return torch.from_numpy(item)
 
