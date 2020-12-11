@@ -1,4 +1,5 @@
 import argparse
+import os
 import torch
 from torch.utils.data import DataLoader
 
@@ -6,10 +7,18 @@ from lib.architectures import Generator, Discriminator
 from lib.dataset import BRCADataset 
 from lib.optim import compute_gradient_penalty
 
+
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-def train_model(input_sequences: str, epochs: int, batch_size: int, lr: float, lambda_gp: float):
+def train(
+    input_sequences: str,
+    checkpt_path: str, 
+    epochs: int, 
+    batch_size: int, 
+    lr: float, 
+    lambda_gp: float,
+):
 
     dataset = BRCADataset(input_sequences)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -19,14 +28,12 @@ def train_model(input_sequences: str, epochs: int, batch_size: int, lr: float, l
     optimizer_G = torch.optim.AdamW(
         generator.parameters(), 
         lr=lr, 
-        lr_decay=0.5, 
-        weight_decay=0.9,
+        weight_decay=0.5,
     )
     optimizer_D = torch.optim.AdamW(
         discriminator.parameters(), 
         lr=lr,
-        lr_decay=0.5,
-        weight_decay=0.9,
+        weight_decay=0.5,
     )   
 
     if cuda:
@@ -60,6 +67,21 @@ def train_model(input_sequences: str, epochs: int, batch_size: int, lr: float, l
                     "[epoch : {}] [sample : {} ] [ generator loss : {}] [ discriminator loss: {}]".format(
                         k, i, G_loss, D_loss
                 ))
+
+        if i % 10 == 0:
+            # checkpoint model
+            torch.save({
+                'epoch': k,
+                'discriminator_state': discriminator.state_dict(),
+                'generator_state': generator.state_dict(),  
+                'optimizer_D_state': optimizer_D.state_dict(),
+                'optimizer_G_state': optimizer_G.state_dict(),
+                'D_loss': D_loss,
+                'G_loss': G_loss,
+            }, os.path.join(checkpt_path, 'checkpt_{}.pt'.format(k)))
+            
+    torch.save(generator.state_dict(), os.path.join(checkpt_path, 'generator_final.pt'))
+    torch.save(discriminator.state_dict(), os.path.join(checkpt_path, 'discrinimator_final.pt'))
 
 if __name__ == "__main__":
     pass
