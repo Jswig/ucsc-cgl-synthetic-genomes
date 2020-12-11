@@ -130,12 +130,16 @@ dmypy.json
 # Data
 *.fa
 *.fai
+*.feather
 *.fna
 *.vcf
 *.vcf.gz
 *.gff3
 *.gff3.gz
 *.csv
+
+# saved models
+*.pt
 
 # vscode
 *.vscode/*
