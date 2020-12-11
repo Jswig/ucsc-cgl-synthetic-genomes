@@ -41,8 +41,6 @@ We treat the haplotypes as independant. As
 
 Hyperparameter tuning for the GAN:
 - tune using prior knowledge of expected parameters
-- 
-
 
 # 7-12-2020
 
