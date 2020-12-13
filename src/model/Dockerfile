@@ -9,4 +9,5 @@ COPY environment.yml .
 RUN conda env update -f environment.yml \
     && conda clean -afy \
     && find /opt/conda/ -follow -type f -name '*.pyc' -delete 
+
 CMD [ "/bin/bash" ] 

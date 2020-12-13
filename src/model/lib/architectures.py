@@ -21,20 +21,21 @@ class ResidualBlock(nn.Module):
 class Generator(nn.Module):
     def __init__(self, seq_len, batch_size):
         super(Generator, self).__init__()
+        # layers
         self.linear_in = nn.Linear(in_features=100, out_features=100*seq_len)
-        self.resblocks = []
-        for _ in range(5):
-            self.resblocks.append(ResidualBlock(100, 100, relu=nn.ReLU))
+        self.resblocks = nn.Sequential(
+            *[ResidualBlock(100, 100, relu=nn.ReLU) for _ in range(5)]
+        )
         self.conv_out = nn.Conv1d(in_channels=100, out_channels=4, kernel_size=1)
-        
-        self.batch_size = batch_size
+        # hyper-parameters
         self.seq_len = seq_len
+        self.batch_size = batch_size
+
     
     def forward(self,z):
         y = self.linear_in(z)
         y = torch.reshape(y, (self.batch_size, 100, self.seq_len))
-        for i in range(5):
-            y = self.resblocks[i](y)
+        y = self.resblocks(y)
         y = self.conv_out(y)
         y = F.softmax(y, dim=1)
         return y
@@ -43,19 +44,19 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, seq_len, batch_size):
         super().__init__()
+        # layers
         self.conv_in = nn.Conv1d(in_channels=4, out_channels=100, kernel_size=1)
-        self.resblocks = []
-        for _ in range(5):
-            self.resblocks.append(ResidualBlock(100, 100, relu=nn.LeakyReLU))
+        self.resblocks = nn.Sequential(
+            *[ResidualBlock(100, 100, relu=nn.ReLU) for _ in range(5)]
+        )
         self.linear_out = nn.Linear(in_features=100*seq_len, out_features=1)
-        
+        # hyper-parameter
         self.seq_len = seq_len
         self.batch_size = batch_size
         
     def forward(self, x):
         y = self.conv_in(x)
-        for i in range(5):
-            y = self.resblocks[i](y)
+        y = self.resblocks(y)
         y = torch.reshape(y, (self.batch_size, 100*self.seq_len))
         y = self.linear_out(y)
         return y
