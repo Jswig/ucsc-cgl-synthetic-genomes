@@ -20,8 +20,8 @@ class BRCADataset(Dataset):
         item = (pd
             .get_dummies(self.sequences.iloc[idx,:])
             .values 
-            .astype(float)
-            .reshape((1,4,self.seq_len))
+            .astype(np.float32)
+            .reshape((4,self.seq_len))
         )
         return torch.from_numpy(item)
 

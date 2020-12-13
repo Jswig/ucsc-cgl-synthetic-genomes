@@ -80,8 +80,16 @@ def train(
                 'G_loss': G_loss,
             }, os.path.join(checkpt_path, 'checkpt_{}.pt'.format(k)))
             
+            
     torch.save(generator.state_dict(), os.path.join(checkpt_path, 'generator_final.pt'))
     torch.save(discriminator.state_dict(), os.path.join(checkpt_path, 'discrinimator_final.pt'))
 
 if __name__ == "__main__":
-    pass
+    train(
+        epochs=1,
+        input_sequences='data/processed/brca1_seqs_subsample.feather',
+        checkpt_path='output',
+        batch_size=1,
+        lr=0.0001,
+        lambda_gp=10,
+    )
