@@ -7,9 +7,7 @@ from lib.architectures import Generator, Discriminator
 from lib.dataset import BRCADataset 
 from lib.optim import compute_gradient_penalty
 
-
-cuda = True if torch.cuda.is_available() else False
-Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 def train(
     input_sequences: str,
@@ -23,8 +21,14 @@ def train(
     dataset = BRCADataset(input_sequences)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    generator = Generator(seq_len=dataset.seq_len, batch_size=batch_size)
-    discriminator = Discriminator(seq_len=dataset.seq_len, batch_size=batch_size)
+    generator = Generator(
+        seq_len=dataset.seq_len, 
+        batch_size=batch_size
+    ).to(device)
+    discriminator = Discriminator(
+        seq_len=dataset.seq_len, 
+        batch_size=batch_size
+    ).to(device)
     optimizer_G = torch.optim.AdamW(
         generator.parameters(), 
         lr=lr, 
@@ -36,15 +40,14 @@ def train(
         weight_decay=0.5,
     )   
 
-    if cuda:
-        generator.cuda()
-        discriminator.cuda()
 
     for k in range(epochs):
         for i, seq in enumerate(dataloader):
+            seq = seq.to(device)
+
             optimizer_G.zero_grad()            
             
-            z = torch.autograd.variable(Tensor(torch.randn(100)))
+            z = torch.autograd.variable(torch.randn(100).to(device))
             fake_seq = generator(z)
 
             real_score = discriminator(seq)
@@ -56,7 +59,7 @@ def train(
             optimizer_D.step()
 
             if i % 5 == 0:
-                # discriminator update
+                # generator update
                 fake_seq = generator(z)
                 fake_score = discriminator(fake_seq)
                 G_loss = -torch.mean(fake_score)
@@ -82,7 +85,7 @@ def train(
             
             
     torch.save(generator.state_dict(), os.path.join(checkpt_path, 'generator_final.pt'))
-    torch.save(discriminator.state_dict(), os.path.join(checkpt_path, 'discrinimator_final.pt'))
+    torch.save(discriminator.state_dict(), os.path.join(checkpt_path, 'discriminator_final.pt'))
 
 if __name__ == "__main__":
     train(

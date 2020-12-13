@@ -1,21 +1,21 @@
 import torch
-import numpy as np
 
-# credit: Erik Linder-Norén,
+# adapted from: Erik Linder-Norén,
 # https://github.com/eriklindernoren/PyTorch-GAN/blob/master/implementations/wgan_gp/wgan_gp.py
 
-cuda = True if torch.cuda.is_available() else False
-Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
-def compute_gradient_penalty(D, real_samples, fake_samples):
+def compute_gradient_penalty(discriminator, real_samples, fake_samples):
     """Calculates the gradient penalty loss for WGAN GP"""
+
+    batch_size = real_samples.shape[0]
     # Random weight term for interpolation between real and fake samples
-    alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1)))
+    alpha = torch.randn((batch_size, 1, 1), device=device)
     # Get random interpolation between real and fake samples
     interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-    d_interpolates = D(interpolates)
-    fake = torch.autograd.Variable(Tensor(real_samples.shape[0], 1).fill_(1.0), requires_grad=False)
+    d_interpolates = discriminator(interpolates)
+    fake = torch.autograd.Variable(torch.ones((batch_size, 1), device=device), requires_grad=False)
     # Get gradient w.r.t. interpolates
     gradients = torch.autograd.grad(
         outputs=d_interpolates,
