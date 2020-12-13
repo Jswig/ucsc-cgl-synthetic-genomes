@@ -90,7 +90,7 @@ def train(
 if __name__ == "__main__":
     train(
         epochs=1,
-        input_sequences='data/processed/brca1_seqs_subsample.feather',
+        input_sequences='data/processed/brca2_seqs.feather',
         checkpt_path='output',
         batch_size=1,
         lr=0.0001,
