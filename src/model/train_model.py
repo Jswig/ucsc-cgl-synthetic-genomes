@@ -20,7 +20,12 @@ def train(
 ):
 
     dataset = BRCADataset(input_sequences)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(
+        dataset, 
+        batch_size=batch_size, 
+        shuffle=True,
+        drop_last=True,
+    )
 
     generator = Generator(
         seq_len=dataset.seq_len, 
