@@ -14,6 +14,7 @@ def train(
     checkpt_path: str, 
     epochs: int, 
     batch_size: int, 
+    latent_dim: int,
     lr: float, 
     lambda_gp: float,
 ):
@@ -23,11 +24,13 @@ def train(
 
     generator = Generator(
         seq_len=dataset.seq_len, 
-        batch_size=batch_size
+        batch_size=batch_size,
+        latent_dim=latent_dim,
     ).to(device)
     discriminator = Discriminator(
         seq_len=dataset.seq_len, 
-        batch_size=batch_size
+        batch_size=batch_size,
+        latent_dim=latent_dim,
     ).to(device)
     optimizer_G = torch.optim.AdamW(
         generator.parameters(), 
@@ -47,7 +50,7 @@ def train(
 
             optimizer_G.zero_grad()            
             
-            z = torch.autograd.variable(torch.randn(100).to(device))
+            z = torch.autograd.variable(torch.randn((batch_size, latent_dim)).to(device))
             fake_seq = generator(z)
 
             real_score = discriminator(seq)
@@ -89,10 +92,11 @@ def train(
 
 if __name__ == "__main__":
     train(
-        epochs=1,
+        epochs=10,
         input_sequences='data/processed/brca2_seqs.feather',
         checkpt_path='output',
-        batch_size=1,
-        lr=0.0001,
+        batch_size=16,
+        latent_dim=50,
+        lr=0.001,
         lambda_gp=10,
     )
