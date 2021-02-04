@@ -91,3 +91,40 @@ taking variant sample frequencies
 
 Is is possible to characterise how much data is needed to get a "good"
 generative model?
+
+
+# 25-01-2021
+
+## *Co-occurence analysis* software:
+
+https://github.com/BRCAChallenge/federated-analysis
+
+- ignore pathology report
+
+- nohup [command] &
+
+Look for concurrence with James' results
+
+
+# 03-02-2021
+
+- train on protein space
+- train just on exome
+
+
+- look at discriminator first
+- train discriminator on output of a "simpler" generative model to evaluate model capacity 
+
+- maybe autoencoder (simpler training than GAN?)
+    - treat hidden dimension as a hyperparameter
+
+- RNN based autoencoder
+    - look at sequence autoencoders based on RNNs 
+    - find minimum processing chunk that a CNN based architecture can take, and 
+    - Batch norm before activation in ResNet
+    
+
+    - Look at where GANs are zeroed!
+    - estimating information complexity of genomics sequences
+    - 
+
