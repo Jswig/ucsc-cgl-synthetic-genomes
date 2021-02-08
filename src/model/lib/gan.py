@@ -1,3 +1,11 @@
+import pandas as pd
+import numpy as np
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset
+
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
 class ResidualBlock(nn.Module):
     def __init__(self, d_in, d_out, relu): #pick nn.ReLU for generator, nn.LeakyRelu for discriminator
         super().__init__()
@@ -66,3 +74,49 @@ class Discriminator(nn.Module):
         y = self.bnorm_out(y)
         y = self.linear_out(y)
         return y
+
+class BRCADataset(Dataset):
+    """Dataset for one of the BRCA genes"""
+
+    def __init__(self, feather_file: str):
+        """ 
+            feather_file (str): Path to the feather file with the dataset
+        """
+        self.sequences = pd.read_feather(feather_file)
+        self.seq_len = self.sequences.shape[1]
+
+    def __len__(self):
+        return(len(self.sequences))
+
+    def __getitem__(self, idx):
+        item = (pd
+            .get_dummies(self.sequences.iloc[idx,:])
+            .values 
+            .astype(np.float32)
+            .reshape((4,self.seq_len))
+        )
+        return torch.from_numpy(item)
+
+
+def compute_gradient_penalty(discriminator, real_samples, fake_samples):
+    """Calculates the gradient penalty loss for WGAN GP"""
+
+    batch_size = real_samples.shape[0]
+    # Random weight term for interpolation between real and fake samples
+    alpha = torch.randn((batch_size, 1, 1), device=device)
+    # Get random interpolation between real and fake samples
+    interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
+    d_interpolates = discriminator(interpolates)
+    fake = torch.autograd.Variable(torch.ones((batch_size, 1), device=device), requires_grad=False)
+    # Get gradient w.r.t. interpolates
+    gradients = torch.autograd.grad(
+        outputs=d_interpolates,
+        inputs=interpolates,
+        grad_outputs=fake,
+        create_graph=True,
+        retain_graph=True,
+        only_inputs=True,
+    )[0]
+    gradients = gradients.view(gradients.size(0), -1)
+    gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+    return gradient_penalty
