@@ -95,11 +95,11 @@ def train(
 
 if __name__ == "__main__":
     train(
-        epochs=10,
+        epochs=80,
         input_sequences='data/processed/brca2_seqs.feather',
         checkpt_path='output',
-        batch_size=16,
-        latent_dim=50,
+        batch_size=8,
+        latent_dim=25,
         lr=0.001,
         lambda_gp=10,
     )
