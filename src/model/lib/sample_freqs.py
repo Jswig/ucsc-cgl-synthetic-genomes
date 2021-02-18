@@ -31,7 +31,7 @@ def compute_sample_freqs(
         pos_freqs = {}
         # frequencies of each variant at this position
         for row in pos_variants.itertuples(index=False):
-            # each row is of form (index, POS, REF, ALT, ...)
+            # each tuple is of form (index, POS, REF, ALT, ...)
             num_alt = np.sum(row[4:])
             sum_alt += num_alt 
             pos_freqs[row[3]] = num_alt / num_samples
@@ -42,7 +42,7 @@ def compute_sample_freqs(
         var_freqs[pos] = pos_freqs
 
     with open(
-        os.path.join(output, os.path.splitext(variants_vcf) + '.json'), 
+        os.path.join(output, os.path.splitext(variants_vcf)[0] + '.json'), 
         'w',
     ) as fp:
         json.dump(var_freqs, fp)
