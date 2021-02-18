@@ -13,8 +13,6 @@ def compute_sample_freqs(
         .vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
         .drop(['ALT_2', 'ALT_3'], axis=1) # ALT_2, ALT_3 are always empty
     )
-    # shift POS to start from 0 in the gene's sequence
-    variants['POS'] = variants['POS'] - start
 
     genotypes = allel.read_vcf(variants_vcf, fields=['calldata/GT'])
     genotypes = genotypes['calldata/GT']
@@ -25,8 +23,6 @@ def compute_sample_freqs(
 
     haplos = pd.concat([variants, haplo_1, haplo_2], axis=1)
     haplos = haplos[(haplos['REF'].str.len() == 1) & (haplos['ALT_1'].str.len() == 1)] # subset to only keep SNPs
-    haplos = haplos.reset_index() # reset index after filtering 
-
     var_freqs = {}
 
     for pos in haplos['POS'].unique():
@@ -34,12 +30,13 @@ def compute_sample_freqs(
         pos_variants = haplos[haplos['POS'] == pos]
         pos_freqs = {}
         # frequencies of each variant at this position
-        for row in pos_variants.iterrows():
-            num_alt = row[4:].sum()
+        for row in pos_variants.itertuples(index=False):
+            # each row is of form (index, POS, REF, ALT, ...)
+            num_alt = np.sum(row[4:])
             sum_alt += num_alt 
-            pos_freqs[row['ALT_1']] = num_alt / num_samples
+            pos_freqs[row[3]] = num_alt / num_samples
         # frequency of the reference 
-        pos_freqs[row['REF']] = (num_samples - sum_alt) / num_samples
+        pos_freqs[row[2]] = (num_samples - sum_alt) / num_samples
 
         # add result to main dictionary
         var_freqs[pos] = pos_freqs

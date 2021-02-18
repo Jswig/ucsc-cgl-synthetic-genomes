@@ -14,6 +14,7 @@ Create a doubly dictionary of the form
     ...
 }
 ```
+
 for each element of the dict, use 
 ```python
 np.choice(vals, n_samples, prob)
