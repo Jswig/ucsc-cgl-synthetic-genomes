@@ -3,7 +3,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 
-from lib.gan import Generator, Discriminator, BRCADataset, compute_gradient_penalty
+from gan import Generator, Discriminator, BRCADataset, compute_gradient_penalty
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
