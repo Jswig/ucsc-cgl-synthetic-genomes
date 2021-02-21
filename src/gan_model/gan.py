@@ -5,36 +5,38 @@ import torch.nn as nn
 from torch.utils.data import Dataset
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
 class ResidualBlock(nn.Module):
-    def __init__(self, d_in, d_out, relu): #pick nn.ReLU for generator, nn.LeakyRelu for discriminator
+    def __init__(self, d_in, d_out, seq_len, relu): #pick nn.ReLU for generator, nn.LeakyRelu for discriminator
         super().__init__()
-        self.bnorm_1 = nn.BatchNorm1d(d_in)
+        self.lnorm_1 = nn.LayerNorm([d_in, seq_len])
         self.relu_1 = relu()
         self.conv_1 = nn.Conv1d(in_channels=d_in, out_channels=d_out, kernel_size=5, padding = 2)
         self.relu_2 = relu()
-        self.bnorm_2 = nn.BatchNorm1d(d_in)
+        self.lnorm_2 = nn.LayerNorm([d_in, seq_len])
         self.conv_2 = nn.Conv1d(in_channels=d_in, out_channels=d_out, kernel_size=5, padding = 2)
         # bias not needed, already present by default in Conv1d()
         
     def forward(self, x):
-        y = self.bnorm_1(x)
-        y = self.relu_1(y)
-        y = self.conv_1(y)
-        y = self.bnorm_1(y)
-        y = self.relu_2(y)
-        y = self.conv_2(y)
-        return x + (0.3 * y)
+        x_0 = x
+        y = self.lnorm_1(x_0)
+        x = self.relu_1(x)
+        x = self.conv_1(x)
+        y = self.lnorm_1(y)
+        x = self.relu_2(x)
+        x = self.conv_2(x)
+        return x_0 + (0.3 * x)
 
 
 class Generator(nn.Module):
     def __init__(self, seq_len, batch_size, latent_dim=100):
         super(Generator, self).__init__()
         # layers
-        self.bnorm_in = nn.BatchNorm1d(latent_dim)
+        self.lnorm_in = nn.LayerNorm(latent_dim)
         self.linear_in = nn.Linear(in_features=latent_dim, out_features=latent_dim*seq_len)
         self.resblocks = nn.Sequential(
-            *[ResidualBlock(latent_dim, latent_dim, relu=nn.LeakyReLU) for _ in range(5)]
+            *[ResidualBlock(
+                latent_dim, latent_dim, seq_len=seq_len, relu=nn.LeakyReLU
+            ) for _ in range(5)]
         )
         self.conv_out = nn.Conv1d(in_channels=latent_dim, out_channels=4, kernel_size=1)
         # hyper-parameters
@@ -42,13 +44,13 @@ class Generator(nn.Module):
         self.latent_dim = latent_dim
         self.batch_size = batch_size
 
-    def forward(self,z):
-        y = self.bnorm_in(z)
-        y = self.linear_in(y)    
-        y = torch.reshape(y, (self.batch_size, self.latent_dim, self.seq_len))
-        y = self.resblocks(y)
-        y = self.conv_out(y)
-        y = F.softmax(y, dim=1)
+    def forward(self,x):
+        x = self.lnorm_in(x)
+        x = self.linear_in(x)    
+        x = torch.reshape(x, (self.batch_size, self.latent_dim, self.seq_len))
+        x = self.resblocks(x)
+        x = self.conv_out(x)
+        y = F.softmax(x, dim=1)
         return y
 
         
@@ -58,21 +60,23 @@ class Discriminator(nn.Module):
         # layers
         self.conv_in = nn.Conv1d(in_channels=4, out_channels=latent_dim, kernel_size=1)
         self.resblocks = nn.Sequential(
-            *[ResidualBlock(latent_dim, latent_dim, relu=nn.LeakyReLU) for _ in range(5)]
+            *[ResidualBlock(
+                latent_dim, latent_dim, seq_len=seq_len, relu=nn.LeakyReLU
+            ) for _ in range(5)]
         )
-        self.bnorm_out = nn.BatchNorm1d(latent_dim*seq_len)
+        self.lnorm_out = nn.LayerNorm(latent_dim*seq_len)
         self.linear_out = nn.Linear(in_features=latent_dim*seq_len, out_features=1)
-        # hyper-parameters
+        # hyper-parameter
         self.seq_len = seq_len
         self.latent_dim = latent_dim
         self.batch_size = batch_size
         
     def forward(self, x):
-        y = self.conv_in(x)
-        y = self.resblocks(y)
-        y = torch.reshape(y, (self.batch_size, self.latent_dim*self.seq_len))
-        y = self.bnorm_out(y)
-        y = self.linear_out(y)
+        x = self.conv_in(x)
+        x = self.resblocks(x)
+        x = torch.reshape(x, (self.batch_size, self.latent_dim*self.seq_len))
+        x = self.lnorm_out(x)
+        y = self.linear_out(x)
         return y
 
 class BRCADataset(Dataset):
