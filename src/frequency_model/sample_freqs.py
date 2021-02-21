@@ -36,15 +36,12 @@ def compute_sample_freqs(
             sum_alt += num_alt 
             pos_freqs[row[3]] = num_alt / num_samples
         # frequency of the reference 
-        pos_freqs[row[2]] = (num_samples - sum_alt) / num_samples
+        pos_freqs[str(row[2])] =  float((num_samples - sum_alt) / num_samples)
 
         # add result to main dictionary
-        var_freqs[pos] = pos_freqs
+        var_freqs[int(pos)] = pos_freqs
 
-    with open(
-        os.path.join(output, os.path.splitext(variants_vcf)[0] + '.json'), 
-        'w',
-    ) as fp:
+    with open('reduced_sample.json', 'w') as fp:
         json.dump(var_freqs, fp)
 
     return 
