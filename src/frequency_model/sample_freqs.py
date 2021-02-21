@@ -41,7 +41,7 @@ def compute_sample_freqs(
         # add result to main dictionary
         var_freqs[int(pos)] = pos_freqs
 
-    with open('reduced_sample.json', 'w') as fp:
+    with open(os.path.join(output, 'reduced_sample.json'), 'w') as fp:
         json.dump(var_freqs, fp)
 
     return 
