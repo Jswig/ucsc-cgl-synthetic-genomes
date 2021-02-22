@@ -19,7 +19,7 @@ def generate_samples(freqs: str, n_samples: int) -> Tuple[List[int], np.ndarray]
         freqs_dict = json.load(fp)
     n_variants = len(freqs_dict)
     positions = freqs_dict.keys()
-    samples = np.arange()
+    samples = np.zeros([positions, n_samples])
     return (positions, samples)
 
 def samples_to_vcf(output: str, samples: np.ndarray):
