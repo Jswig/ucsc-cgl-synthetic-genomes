@@ -22,8 +22,9 @@ def compute_sample_freqs(
     )
     genotypes = allel.read_vcf(variants_vcf, fields=['calldata/GT'])
     genotypes = genotypes['calldata/GT']
-    haplo_1 = pd.DataFrame(genotypes[:,:,0])
-    haplo_2 = pd.DataFrame(genotypes[:,:,1])
+    # scikit-allel reads missing values as -1
+    haplo_1 = pd.DataFrame(genotypes[:,:,0]).replace(-1, 0)
+    haplo_2 = pd.DataFrame(genotypes[:,:,1]).replace(-1, 0)
     
     num_samples = haplo_1.shape[1] * 2
 
@@ -34,24 +35,26 @@ def compute_sample_freqs(
     for pos in haplos['POS'].unique():
         sum_alt = 0
         pos_variants = haplos[haplos['POS'] == pos]
-        pos_freqs = {}
+        freqs = []
+        variants = []
         # frequencies of each variant at this position
         for row in pos_variants.itertuples(index=False):
-            # each tuple is of form (index, POS, REF, ALT, ...)
+            # each tuple is of form (POS, REF, ALT, ...)
             num_alt = np.sum(row[3:])
             sum_alt += num_alt 
-            pos_freqs[row[2]] = num_alt / num_samples
+            variants.append(row[2])
+            freqs.append(num_alt / num_samples)
         # frequency of the reference 
-        pos_freqs[str(row[1])] =  float((num_samples - sum_alt) / num_samples)
-
+        variants.append(row[1])
+        freqs.append((num_samples - sum_alt) / num_samples)
         # add result to main dictionary
-        var_freqs[int(pos)] = pos_freqs
+        var_freqs[int(pos)] = (variants, freqs)
 
-    with open('reduced_sample.json', 'w') as fp:
+    with open(output, 'w') as fp:
         json.dump(var_freqs, fp)
 
     return 
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     args=parser.parse_args()
     compute_sample_freqs(args.input, args.output)
