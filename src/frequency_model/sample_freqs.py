@@ -1,9 +1,16 @@
-import pandas as pd
-import numpy as np 
 import allel
+import argparse
+import numpy as np 
+import pandas as pd
 import os
 import sys
 import json
+
+parser = argparse.ArgumentParser(
+    description='Compute sample frequencies for each SNP from a VCF file'
+)
+parser.add_argument('input', help='Input VCF file')
+parser.add_argument('output', help='Output JSON file')
 
 def compute_sample_freqs(
     variants_vcf: str, 
@@ -13,7 +20,6 @@ def compute_sample_freqs(
         .vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
         .drop(['ALT_2', 'ALT_3'], axis=1) # ALT_2, ALT_3 are always empty
     )
-
     genotypes = allel.read_vcf(variants_vcf, fields=['calldata/GT'])
     genotypes = genotypes['calldata/GT']
     haplo_1 = pd.DataFrame(genotypes[:,:,0])
@@ -32,11 +38,11 @@ def compute_sample_freqs(
         # frequencies of each variant at this position
         for row in pos_variants.itertuples(index=False):
             # each tuple is of form (index, POS, REF, ALT, ...)
-            num_alt = np.sum(row[4:])
+            num_alt = np.sum(row[3:])
             sum_alt += num_alt 
-            pos_freqs[row[3]] = num_alt / num_samples
+            pos_freqs[row[2]] = num_alt / num_samples
         # frequency of the reference 
-        pos_freqs[str(row[2])] =  float((num_samples - sum_alt) / num_samples)
+        pos_freqs[str(row[1])] =  float((num_samples - sum_alt) / num_samples)
 
         # add result to main dictionary
         var_freqs[int(pos)] = pos_freqs
@@ -47,5 +53,5 @@ def compute_sample_freqs(
     return 
 
 if __name__ == '__main__':
-    for fname in sys.argv[2:]:   
-        compute_sample_freqs(fname, sys.argv[1])
+    args=parser.parse_args()
+    compute_sample_freqs(args.input, args.output)
