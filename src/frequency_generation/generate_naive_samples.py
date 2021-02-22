@@ -24,7 +24,7 @@ def generate_samples(freqs_dict: dict, n_samples: int) ->  np.ndarray:
     return samples
 
 def samples_to_vcf(
-    freqs_dict: dict, output: str, n_samples: int, chrom: int, samples: np.ndarray
+    freqs_dict: dict, output: str, n_samples: int, samples: np.ndarray
 ):
     vcf_header = (
         "##fileformat=VCFv4.1\n"
@@ -39,10 +39,17 @@ def samples_to_vcf(
         for pos in tqdm(freqs_dict.keys()):
             bases = freqs_dict[pos][0]
             ref = bases.pop()
+            haplos = samples.pop()
+            haplo_1, haplo_2 = np.split(haplos, 2) # haplos has length 2*n_samples
             for variant in bases:
                 vcf.write(f'17\t{pos}\t.\t{ref}\t{variant}\t.\t.\t.\tGT\t')
-
-
+                haplo_1_has_var = np.where(haplo_1 == variant, 1, 0)
+                haplo_2_has_var = np.where(haplo_2 == variant, 1, 0)
+                genotypes = [
+                    f'{haplo_1_has_var[k]}|{haplo_2_has_var[k]}\t'
+                    for k in range(len(haplo_1))
+                ]
+                vcf.write(''.join(genotypes))
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -50,4 +57,4 @@ if __name__ == '__main__':
         freqs_dict = json.load(f)
     samples = generate_samples(freqs_dict, args.n_samples)
     print(samples[1])
-    samples_to_vcf(freqs_dict, args.output, samples, args.n_samples)
+    samples_to_vcf(freqs_dict, args.output, args.n_samples, samples)
