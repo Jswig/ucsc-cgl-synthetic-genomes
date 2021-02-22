@@ -30,7 +30,22 @@ steps:
 - id: "frequency_model"
   uses: "./containers/allel"
   runs: ["python"]
-  args: ["src/frequency_model/sample_frequencies.py"]
+  args: [
+    "src/frequency_model/sample_frequencies.py", 
+    "data/raw/brca2.vcf",
+    "output/sample_freqs.json"
+  ]
+  options:
+    user: 30100
+
+- id: "frequency_generation"
+  uses: "./containers/allel"
+  runs: "python"
+  args: [
+    "generate_naive_samples.py",
+    "output/sample_freqs.json",
+    "output/naive_samples.vcf"
+  ]
   options:
     user: 30100
 
