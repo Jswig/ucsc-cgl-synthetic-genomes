@@ -2,9 +2,8 @@ import allel
 import argparse
 import numpy as np 
 import pandas as pd
-import os
-import sys
 import json
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(
     description='Compute sample frequencies for each SNP from a VCF file'
@@ -32,7 +31,7 @@ def compute_sample_freqs(
     haplos = haplos[(haplos['REF'].str.len() == 1) & (haplos['ALT_1'].str.len() == 1)] # subset to only keep SNPs
     var_freqs = {}
 
-    for pos in haplos['POS'].unique():
+    for pos in tqdm(haplos['POS'].unique()):
         sum_alt = 0
         pos_variants = haplos[haplos['POS'] == pos]
         freqs = []
