@@ -50,6 +50,7 @@ def samples_to_vcf(
                     for k in range(len(haplo_1))
                 ]
                 vcf.write(''.join(genotypes))
+                vcf.write('\n')
 
 if __name__ == '__main__':
     args = parser.parse_args()
