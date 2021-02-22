@@ -40,7 +40,7 @@ steps:
 
 - id: "frequency_generation"
   uses: "./containers/allel"
-  runs: "python"
+  runs: ["python"]
   args: [
     "generate_naive_samples.py",
     "output/sample_freqs.json",
