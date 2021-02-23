@@ -1,9 +1,19 @@
+import allel
+import argparse
+import Bio.SeqIO
 import numpy as np 
 import pandas as pd 
-import allel
-
-import Bio.SeqIO
 import os.path 
+
+parser = argparse.ArgumentParser(
+    description='Build nucleotide sequences from samples in a VCF file with positions from a single chromosome'
+)
+parser.add_argument('input', help='Input VCF file')
+parser.add_argument('output', help='Output feather file')
+parser.add_argument('reference', help='reference genome fasta')
+parser.add_argument('samples_ids', help='VCF sample IDs')
+parser.add_argument('start', type=int, help='starting position of output sequence')
+parser.add_argument('end', type=int, help='ending position of output sequence')
 
 def extract_from_vcf(
     reference_fasta: str, 
@@ -53,25 +63,25 @@ def extract_from_vcf(
     seqs_df.columns = seqs_df.columns.astype(str)
     seqs_df.to_feather(output)
 
-
 if __name__ == '__main__':
-
-    if not os.path.isfile('data/interim/brca1_seqs.feather'):
+    args=parser.parse_args()
+    if not os.path.isfile(args.output):
         extract_from_vcf(
-            reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.17.fa', 
-            variants_vcf='data/raw/brca1.vcf',
-            sample_ids='data/interim/sample_names.txt',
-            output='data/processed/brca1_seqs.feather',
-            start=43044295,
-            end=43170246,
+            reference_fasta=args.reference, 
+            variants_vcf=args.input,
+            sample_ids=args.sample_ids,
+            output=args.output,
+            start=args.start,
+            end=args.end,
         )
 
-    if not os.path.isfile('data/interim/brca2_seqs.feather'):   
-        extract_from_vcf(
-            reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.13.fa', 
-            variants_vcf='data/raw/brca2.vcf',
-            sample_ids='data/interim/sample_names.txt',
-            output='data/processed/brca2_seqs.feather',
-            start=32315086,
-            end=32400267,
-        )
+
+        # extract_from_vcf(
+        #     reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.17.fa', 
+        #     variants_vcf='data/raw/brca1.vcf',
+        #     sample_ids='data/interim/sample_names.txt',
+        #     output='data/processed/brca1_seqs.feather',
+        #     start=43044295,
+        #     end=43170246,
+        # )
+

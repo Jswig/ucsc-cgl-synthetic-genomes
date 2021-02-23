@@ -16,7 +16,15 @@ steps:
 - id: "preprocessing"
   uses: "./containers/allel"
   runs: ["python"]
-  args: ["src/preprocessing/extract_sequences.py"]
+  args: [
+    "src/preprocessing/extract_sequences.py",
+    "data/Homo_sapiens.GRCh38.dna.chromosome.17.fa",
+    "data/raw/brca2.vcf",
+    "data/interim/sample_names.txt",
+    "data/processed/brca2_Seqs.feather",
+    "43044295",
+    "43170246"
+  ]
   options:
     user: 30100
 
@@ -33,7 +41,7 @@ steps:
   args: [
     "src/frequency_model/sample_frequencies.py", 
     "data/raw/brca2.vcf",
-    "output/sample_freqs.json"
+    "output/models/sample_freqs.json"
   ]
   options:
     user: 30100
@@ -43,8 +51,8 @@ steps:
   runs: ["python"]
   args: [
     "generate_naive_samples.py",
-    "output/sample_freqs.json",
-    "output/naive_samples.vcf"
+    "output/models/sample_freqs.json",
+    "output/samples/naive_samples.vcf"
   ]
   options:
     user: 30100
