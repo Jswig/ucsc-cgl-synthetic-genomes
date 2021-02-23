@@ -53,6 +53,8 @@ steps:
     "generate_naive_samples.py",
     "output/models/sample_freqs.json",
     "output/samples/naive_samples.vcf"
+    "-n",
+    "10000"
   ]
   options:
     user: 30100
