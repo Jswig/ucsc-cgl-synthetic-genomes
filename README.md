@@ -46,9 +46,9 @@ python src/frequency_model/sample_frequencies.py \
 
 python src/frequency_generation/generate_naive_samples.py \
     generate_naive_samples.py \
-    output/models/sample_freqs.json \
-    output/samples/naive_samples.vcf \
     -n 10000 \
+    output/models/sample_freqs.json \
+    output/samples/naive_samples.vcf 
 ```
 Omit the first command if `sample_freqs.json` already 
 exists

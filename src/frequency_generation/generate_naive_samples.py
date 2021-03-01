@@ -40,7 +40,7 @@ def samples_to_vcf(
     with open(output, 'w') as vcf:
         vcf.write(vcf_header)
 
-        for pos in tqdm(list(freqs_dict.keys())):
+        for pos in tqdm(list(freqs_dict.keys())[:-1]):
             bases = freqs_dict[pos][0]
             ref = bases.pop()
             haplos = samples.popleft()
@@ -51,10 +51,14 @@ def samples_to_vcf(
                 haplo_2_has_var = np.where(haplo_2 == variant, 1, 0)
                 genotypes = [
                     f'{haplo_1_has_var[k]}|{haplo_2_has_var[k]}\t'
-                    for k in range(len(haplo_1))
+                    for k in range(len(haplo_1) - 1)
                 ]
+                genotypes.append(
+                    f'{haplo_1_has_var[len(haplo_1)]}|{haplo_2_has_var[len(haplo_1)]}'
+                )
                 vcf.write(''.join(genotypes))
                 vcf.write('\n')
+        
 
 if __name__ == '__main__':
     args = parser.parse_args()
