@@ -42,12 +42,12 @@ In the container,
 ```sh
 python src/frequency_model/sample_frequencies.py \
     data/raw/brca2.vcf \
-    output/models/sample_freqs.json &&
+    output/models/brca2_freqs.json &&
 
 python src/frequency_generation/generate_naive_samples.py \
     generate_naive_samples.py \
     -n 10000 \
-    output/models/sample_freqs.json \
+    output/models/brca2_freqs.json \
     output/samples/naive_samples.vcf 
 ```
 Omit the first command if `sample_freqs.json` already 
