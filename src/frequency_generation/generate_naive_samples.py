@@ -22,6 +22,7 @@ def generate_samples(freqs_dict: dict, n_samples: int) ->  Deque[np.ndarray]:
         samples.append(
             np.random.choice(v[0], size=n_samples*2, p=v[1])
         ) # n_samples*2 as we need two samples to get the genotype
+        
     # with open('output/samples_log.json', 'w') as log:
     #     l_samples = [list(sample) for sample in samples]
     #     json.dump(l_samples, log)  
