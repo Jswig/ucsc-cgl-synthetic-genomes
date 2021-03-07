@@ -10,10 +10,12 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('input', help='Input VCF file')
 parser.add_argument('output', help='Output JSON file')
+parser.add_argument('--snp_only', type=bool, default=True, help='Keep only SNPs')
 
 def compute_sample_freqs(
     variants_vcf: str, 
     output: str,
+    snp_only: bool,
 ):
     variants = (allel
         .vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
@@ -28,7 +30,9 @@ def compute_sample_freqs(
     num_samples = haplo_1.shape[1] * 2
 
     haplos = pd.concat([variants, haplo_1, haplo_2], axis=1)
-    haplos = haplos[(haplos['REF'].str.len() == 1) & (haplos['ALT_1'].str.len() == 1)] # subset to only keep SNPs
+    if snp_only:
+        haplos = haplos[(haplos['REF'].str.len() == 1) & (haplos['ALT_1'].str.len() == 1)] # subset to only keep SNPs
+    
     var_freqs = {}
 
     for pos in tqdm(haplos['POS'].unique()):
@@ -56,4 +60,4 @@ def compute_sample_freqs(
 
 if __name__ == '__main__': 
     args=parser.parse_args()
-    compute_sample_freqs(args.input, args.output)
+    compute_sample_freqs(args.input, args.output, args.snp_only)
