@@ -32,7 +32,7 @@ def compute_sample_freqs(
     num_samples = haplo_1.shape[1] * 2
 
     haplos = pd.concat([variants, haplo_1, haplo_2], axis=1)
-    if snp:
+    if snp_only:
         haplos = haplos[
             (haplos['REF'].str.len() == 1) & (haplos['ALT_1'].str.len() == 1)
         ] # subset to only keep SNPs
