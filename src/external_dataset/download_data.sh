@@ -10,13 +10,13 @@ cd data
 
 if [ ! -f $CHROM_13 ]
 then
-    wget $SOURCE/$CHROM_13.gz
-    gunzip $CHROM_13
+	wget $SOURCE/$CHROM_13.gz
+	gunzip $CHROM_13
 fi
 
 if [ ! -f $CHROM_17 ]
 then 
-    wget $SOURCE/$CHROM_17.gz
-    gunzip $CHROM_17.gz
+	wget $SOURCE/$CHROM_17.gz
+	gunzip $CHROM_17.gz
 fi 
 
