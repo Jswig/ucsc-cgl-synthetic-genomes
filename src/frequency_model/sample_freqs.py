@@ -1,4 +1,4 @@
-  import allel
+import allel
 import argparse
 import numpy as np 
 import pandas as pd
@@ -19,6 +19,16 @@ def compute_sample_freqs(
 	output: str,
 	snp_only: bool,
 ):
+	"""
+	Creates JSON file of form 
+	{
+		<position>: {
+			"REF": [ <ref_alt1>, <ref_alt2>, ...]
+			"ALT": [ <alt1>, <alt2>, ...]
+			"probs": [<p_alt1>, <p_alt2>, ... <p_ref>] 
+		}
+	}
+	"""
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
 		.drop(['ALT_2', 'ALT_3'], axis=1) # ALT_2, ALT_3 are always empty
@@ -42,20 +52,26 @@ def compute_sample_freqs(
 	for pos in tqdm(haplos['POS'].unique()):
 		sum_alt = 0
 		pos_variants = haplos[haplos['POS'] == pos]
-		freqs = []
+		refs = []
 		variants = []
+		freqs = []
+
 		# frequencies of each variant at this position
 		for row in pos_variants.itertuples(index=False):
 			# each tuple is of form (POS, REF, ALT, ...)
 			num_alt = np.sum(row[3:])
 			sum_alt += num_alt 
+			refs.append(row[1])
 			variants.append(row[2])
 			freqs.append(num_alt / num_samples)
 		# frequency of the reference 
-		variants.append(row[1])
 		freqs.append((num_samples - sum_alt) / num_samples)
 		# add result to main dictionary
-		var_freqs[int(pos)] = (variants, freqs)
+		var_freqs[int(pos)] = {
+			'REF': refs, 
+			'ALT': variants,
+			'freq': freqs
+		}
 
 	with open(output, 'w') as fp:
 		json.dump(var_freqs, fp)
