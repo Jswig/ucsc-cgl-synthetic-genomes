@@ -74,7 +74,7 @@ def compute_sample_freqs(
 		}
 
 	with open(output, 'w') as fp:
-		json.dump(var_freqs, fp)
+		json.dump(var_freqs, fp, sort_keys=True)
 
 	return 
 
