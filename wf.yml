@@ -1,61 +1,61 @@
 steps:
 - id: "external_data"
-	uses: "docker://ubuntu:20.04"
-	runs: ["sh"]
-	args: ["src/dataset/download_data.sh"]
-	options:
-		user: 30100
+  uses: "docker://ubuntu:20.04"
+  runs: ["sh"]
+  args: ["src/dataset/download_data.sh"]
+  options:
+    user: 30100
 
 - id: "sample_names"
-	uses: "docker://biocontainers/bcftools:v1.9-1-deb_cv1"
-	runs: ["sh"]
-	args: ["src/sample_names/extract_names.sh"]
-	options:
-		user: 30100
+  uses: "docker://biocontainers/bcftools:v1.9-1-deb_cv1"
+  runs: ["sh"]
+  args: ["src/sample_names/extract_names.sh"]
+  options:
+    user: 30100
 
 - id: "preprocessing"
-	uses: "./containers/allel"
-	runs: ["python"]
-	args: [
-		"src/preprocessing/extract_sequences.py",
-		"data/Homo_sapiens.GRCh38.dna.chromosome.17.fa",
-		"data/raw/brca2.vcf",
-		"data/interim/sample_names.txt",
-		"data/processed/brca2_Seqs.feather",
-		"43044295",
-		"43170246"
-	]
-	options:
-		user: 30100
+  uses: "./containers/allel"
+  runs: ["python"]
+  args: [
+    "src/preprocessing/extract_sequences.py",
+    "data/Homo_sapiens.GRCh38.dna.chromosome.17.fa",
+    "data/raw/brca2.vcf",
+    "data/interim/sample_names.txt",
+    "data/processed/brca2_Seqs.feather",
+    "43044295",
+    "43170246"
+  ]
+  options:
+    user: 30100
 
 - id: "gan_model"
-	uses: "./containers/torch"
-	runs: ["python"]
-	args: ["src/gan_model/train_gan.py"]
-	options:
-		user: 30100
+  uses: "./containers/torch"
+  runs: ["python"]
+  args: ["src/gan_model/train_gan.py"]
+  options:
+    user: 30100
 
 - id: "frequency_model"
-	uses: "./containers/allel"
-	runs: ["python"]
-	args: [
-		"src/frequency_model/sample_frequencies.py", 
-		"data/raw/brca2.vcf",
-		"output/models/sample_freqs.json"
-	]
-	options:
-		user: 30100
+  uses: "./containers/allel"
+  runs: ["python"]
+  args: [
+    "src/frequency_model/sample_frequencies.py", 
+    "data/raw/brca2.vcf",
+    "output/models/sample_freqs.json"
+  ]
+  options:
+    user: 30100
 
 - id: "frequency_generation"
-	uses: "./containers/allel"
-	runs: ["python"]
-	args: [
-		"generate_naive_samples.py",
-		"output/models/sample_freqs.json",
-		"output/samples/naive_samples.vcf",
-		"-n",
-		"10000"
-	]
-	options:
-		user: 30100
+  uses: "./containers/allel"
+  runs: ["python"]
+  args: [
+    "generate_naive_samples.py",
+    "output/models/sample_freqs.json",
+    "output/samples/naive_samples.vcf",
+    "-n",
+    "10000"
+  ]
+  options:
+    user: 30100
 
