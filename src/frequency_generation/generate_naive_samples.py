@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from collections import deque
 from tqdm import tqdm
-from typing import Deque, Tuple
+from typing import Dict, Tuple
 
 parser = argparse.ArgumentParser(
 	description='Generate artificial samples using naive frequency model'
@@ -16,16 +16,26 @@ parser.add_argument(
 	'-n', '--n_samples', default=100, type=int, help='Number of samples to generate'
 )
 
-def generate_samples(freqs_dict: dict, n_samples: int) ->  Deque[np.ndarray]:
-	samples = deque()
-	for v in tqdm(freqs_dict.values()):
-		samples.append(
-			np.random.choice(v[0], size=n_samples*2, p=v[1])
-		) # n_samples*2 as we need two samples to get the genotype
+def generate_samples(
+	freqs_dict: dict, 
+	n_samples: int, 
+	log: bool = False,
+	log_path: str = None,
+) ->  Dict[int, np.ndarray]:
+	samples = {}
+	for pos, v in tqdm(freqs_dict.items()):
+		print(len(np.arange(0, len(v['freq']))))
+		print(len(v['freq']))
 		
-	with open('output/samples_log.json', 'w') as log:
-		l_samples = [list(sample) for sample in samples]
-		json.dump(l_samples, log)  
+		samples[pos] = np.random.choice(
+			np.arange(0, len(v['freq'])), 
+			size=n_samples*2, 	
+			p=v['freq']
+		)
+	if log:
+		with open(log_path, 'w') as log:
+			l_samples = {k: list(v) for (k,v) in samples}
+			json.dump(l_samples, log)  
 	return samples
 
 def samples_to_vcf(
@@ -42,15 +52,15 @@ def samples_to_vcf(
 	with open(output, 'w') as vcf:
 		vcf.write(vcf_header)
 
-		for pos in tqdm(list(freqs_dict.keys())[:-1]):
-			bases = freqs_dict[pos][0]
-			ref = bases.pop()
-			haplos = samples.popleft()
+		for pos, v in tqdm(freqs_dict.items()):
+			refs = v['REF']
+			variants = v['ALT']
+			haplos = samples[pos]
 			haplo_1, haplo_2 = np.split(haplos, 2) # haplos has length 2*n_samples 
-			for variant in bases: 
-				vcf.write(f'13\t{pos}\t.\t{ref}\t{variant}\t.\t.\t.\tGT\t')
-				haplo_1_has_var = np.where(haplo_1 == variant, 1, 0)
-				haplo_2_has_var = np.where(haplo_2 == variant, 1, 0)
+			for i, (ref, var) in enumerate(zip(refs, variants)): 
+				vcf.write(f'13\t{pos}\t.\t{ref}\t{var}\t.\t.\t.\tGT\t')
+				haplo_1_has_var = np.where(haplo_1 == i, 1, 0)
+				haplo_2_has_var = np.where(haplo_2 == i, 1, 0)
 				genotypes = [
 					f'{haplo_1_has_var[k]}|{haplo_2_has_var[k]}\t'
 					for k in range(len(haplo_1) - 1)
@@ -64,6 +74,7 @@ def samples_to_vcf(
 if __name__ == '__main__':
 	args = parser.parse_args()
 	with open(args.input, 'r')  as f:
+		# note: ensure keys in JSON are sorted 
 		freqs_dict = json.load(f)
 	samples = generate_samples(freqs_dict, args.n_samples)
 	samples_to_vcf(freqs_dict, args.output, args.n_samples, samples)

@@ -55,7 +55,6 @@ def compute_sample_freqs(
 		refs = []
 		variants = []
 		freqs = []
-
 		# frequencies of each variant at this position
 		for row in pos_variants.itertuples(index=False):
 			# each tuple is of form (POS, REF, ALT, ...)
