@@ -13,7 +13,7 @@ steps:
   options:
     user: 30100
 
-- id: "preprocessing"
+- id: "gan_preprocessing"
   uses: "./containers/allel"
   runs: ["python"]
   args: [
@@ -28,14 +28,14 @@ steps:
   options:
     user: 30100
 
-- id: "gan_model"
+- id: "gan_fit"
   uses: "./containers/torch"
   runs: ["python"]
   args: ["src/gan_model/train_gan.py"]
   options:
     user: 30100
 
-- id: "frequency_model"
+- id: "naive_model_fit"
   uses: "./containers/allel"
   runs: ["python"]
   args: [
@@ -46,7 +46,7 @@ steps:
   options:
     user: 30100
 
-- id: "frequency_generation"
+- id: "naive_model_generation"
   uses: "./containers/allel"
   runs: ["python"]
   args: [

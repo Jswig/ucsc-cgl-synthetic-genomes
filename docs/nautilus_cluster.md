@@ -1,4 +1,4 @@
-#
+# Nautilsu cluster usage
 
 ## Cluster
 
@@ -15,12 +15,8 @@ Kill GPU jobs under 60% utilization.
 
 - use `python -u` to unbuffer output
 - use comet.ml for model monitoring
-    - does hyperparameter tuning 
-
-### 
 
 ### Storage
 
-- 
 - don't install AWS endpoints!
 - just alias the URL for the endpoint

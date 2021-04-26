@@ -50,14 +50,11 @@ Using approach on DNA sequences requires care in handling discretozation:
 - use continuous relaxation of one-hot sequence vectors with normalizad
 probability distribution over nucleotides
 - Recover a discrete sequence using argmax
-
-Use edit distance to evaluate model perfomance
-Reflecting latent space $z \rightarrow -z$ shows that model learn 
-$A-T$ and $C-G$ bindings 
-
-Can use **Position Weight Matrices** (PWM) to encode specific DNA motifs
+- Use edit distance to evaluate model perfomance
+- Reflecting latent space $z \rightarrow -z$ shows that model learn $A-T$ and $C-G$ bindings 
+- Can use **Position Weight Matrices** (PWM) to encode specific DNA motifs
 into the predictor function
-- 
+
 - make using population allele frequency!
 
 
@@ -65,10 +62,6 @@ Claim that VAE is unsuitable to sequences, tested VAEs in multiple configuration
 - VAE performs poorly in noisy scenarios
 
 Paper code: https://github.com/co9olguy/Generating-and-designing-DNA
-
-
-## Differentially private genetic models
-
 
 ## VCF Data format
 
@@ -90,3 +83,7 @@ is not that useful
 
 **functional domains:** parts of the gene that code for "irreplaceable"
 parts of the protein
+
+## Statistical models for co-occurence data
+
+product space mixture might not be useful? since $X$ and $Y$ are the same set of variants, only on different copies of the chromosome
