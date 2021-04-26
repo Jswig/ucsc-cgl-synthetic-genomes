@@ -3,15 +3,11 @@ steps:
   uses: "docker://ubuntu:20.04"
   runs: ["sh"]
   args: ["src/dataset/download_data.sh"]
-  options:
-    user: 30100
 
 - id: "sample_names"
   uses: "docker://biocontainers/bcftools:v1.9-1-deb_cv1"
   runs: ["sh"]
   args: ["src/sample_names/extract_names.sh"]
-  options:
-    user: 30100
 
 - id: "gan_preprocessing"
   uses: "./containers/allel"
@@ -25,17 +21,13 @@ steps:
     "43044295",
     "43170246"
   ]
-  options:
-    user: 30100
 
 - id: "gan_fit"
   uses: "./containers/torch"
   runs: ["python"]
   args: ["src/gan_model/train_gan.py"]
-  options:
-    user: 30100
 
-- id: "naive_model_fit"
+- id: "naive_fit"
   uses: "./containers/allel"
   runs: ["python"]
   args: [
@@ -43,10 +35,8 @@ steps:
     "data/raw/brca2.vcf",
     "output/models/sample_freqs.json"
   ]
-  options:
-    user: 30100
 
-- id: "naive_model_generation"
+- id: "naive_generation"
   uses: "./containers/allel"
   runs: ["python"]
   args: [
@@ -56,6 +46,8 @@ steps:
     "-n",
     "10000"
   ]
-  options:
-    user: 30100
+  
+- id: "em_preprocessing"
+  uses: "./containers/allel"
+  runs: ["python"]
 
