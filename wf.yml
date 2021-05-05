@@ -25,7 +25,21 @@ steps:
 - id: "gan_fit"
   uses: "./containers/torch"
   runs: ["python"]
-  args: ["src/gan_model/train_gan.py"]
+  args: [
+    "src/gan_model/train_gan.py",
+    "data/processed/brca2_Seqs.feather",
+    "output/models/gan_latent_dim_25"
+    "--epochs",
+    "500",
+    "--batch_size",
+    "8",
+    "--latent_dim",
+    "25",
+    "--lr",
+    "0.0001",
+    "gp",
+    "10"
+  ]
 
 - id: "naive_fit"
   uses: "./containers/allel"

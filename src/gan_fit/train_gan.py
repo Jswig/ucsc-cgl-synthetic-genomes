@@ -1,22 +1,41 @@
 import argparse
 import os
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from gan import Generator, Discriminator, BRCADataset, compute_gradient_penalty
 
+
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+argparse = argparse.ArgumentParser(
+	description='Train GAN with given parameters'
+)
+argparse.add_argument('input', type=str, help='Input DNA sequences in .feather format')
+argparse.add_argument('checkpoint', type=str, help='Checkpoint path')
+argparse.add_argument(
+	'--epochs', default=100, type=int, help='Number of training epochs' 
+)
+argparse.add_argument(
+	'--batch_size', default=16, type=int, help='Training batch size'
+)
+argparse.add_argument(
+	'--latent_dim', default=25, type=int, help='Dimension of latent space'
+)
+argparse.add_argument('--lr', default=0.001, type=float, help='Learning rate')
+argparse.add_argument('--gp', default=10, type=floar, help='Gradient penalty')
+
 
 def train(
-	input_sequences: str,
+	dataloader: DataLoader,
+	generator: nn.Module,
+	discriminator: nn.Module,
 	checkpt_path: str, 
 	epochs: int, 
 	batch_size: int, 
-	latent_dim: int,
 	lr: float, 
 	lambda_gp: float,
 ):
-
 	dataset = BRCADataset(input_sequences)
 	dataloader = DataLoader(
 		dataset, 
@@ -24,17 +43,6 @@ def train(
 		shuffle=True,
 		drop_last=True,
 	)
-
-	generator = Generator(
-		seq_len=dataset.seq_len, 
-		batch_size=batch_size,
-		latent_dim=latent_dim,
-	).to(device)
-	discriminator = Discriminator(
-		seq_len=dataset.seq_len, 
-		batch_size=batch_size,
-		latent_dim=latent_dim,
-	).to(device)
 	optimizer_G = torch.optim.AdamW(
 		generator.parameters(), 
 		lr=lr, 
@@ -45,8 +53,6 @@ def train(
 		lr=lr,
 		weight_decay=0.5,
 	)   
-
-
 	for k in range(epochs):
 		for i, seq in enumerate(dataloader):
 			seq = seq.to(device)
@@ -73,9 +79,8 @@ def train(
 				optimizer_G.step()
 
 				print(
-					"[epoch : {}] [sample : {} ] [ generator loss : {}] [ discriminator loss: {}]".format(
-						k, i, G_loss, D_loss
-				))
+					f"[epoch : {k}] [sample : {i} ] [ generator loss : {G_loss}] [ discriminator loss: {D_loss}]"
+				)
 
 		if i % 10 == 0:
 			# checkpoint model
@@ -94,12 +99,33 @@ def train(
 	torch.save(discriminator.state_dict(), os.path.join(checkpt_path, 'discriminator_final.pt'))
 
 if __name__ == "__main__":
+	args = parser.parse_args()
+
+	dataset = BRCADataset(args.input)
+	dataloader = DataLoader(
+		dataset, 
+		batch_size=args.batch_size, 
+		shuffle=True,
+		drop_last=True,
+	)
+	generator = Generator(
+		seq_len=dataset.seq_len, 
+		batch_size=args.batch_size,
+		latent_dim=args.latent_dim,
+	).to(device)
+	discriminator = Discriminator(
+		seq_len=dataset.seq_len, 
+		batch_size=args.batch_size,
+		latent_dim=args.latent_dim,
+	).to(device)
+
 	train(
-		epochs=80,
-		input_sequences='data/processed/brca2_seqs.feather',
-		checkpt_path='output',
-		batch_size=8,
-		latent_dim=25,
-		lr=0.001,
-		lambda_gp=10,
+		dataloader=dataloader,
+		generator=generator,
+		discriminator=discriminator,
+		checkpt_path=args.checkpoint,
+		epochs=args.epochs,
+		batch_size=args.batch_size,
+		lr=args.lr,
+		lambda_gp=args.gp,
 	)
