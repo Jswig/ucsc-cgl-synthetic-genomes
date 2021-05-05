@@ -24,9 +24,6 @@ def generate_samples(
 ) ->  Dict[int, np.ndarray]:
 	samples = {}
 	for pos, v in tqdm(freqs_dict.items()):
-		print(len(np.arange(0, len(v['freq']))))
-		print(len(v['freq']))
-		
 		samples[pos] = np.random.choice(
 			np.arange(0, len(v['freq'])), 
 			size=n_samples*2, 	
