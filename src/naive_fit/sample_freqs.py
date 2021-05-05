@@ -36,8 +36,9 @@ def compute_sample_freqs(
 	genotypes = allel.read_vcf(variants_vcf, fields=['calldata/GT'])
 	genotypes = genotypes['calldata/GT']
 	# scikit-allel reads missing values as -1
-	haplo_1 = pd.DataFrame(genotypes[:,:,0]).replace(-1, 0)
-	haplo_2 = pd.DataFrame(genotypes[:,:,1]).replace(-1, 0)
+	genotypes = np.where(genotypes == -1, 0, genotypes)
+	haplo_1 = genotypes[:,:,0]
+	haplo_2 = genotypes[:,:,1]
 	
 	num_samples = haplo_1.shape[1] * 2
 
