@@ -13,7 +13,7 @@ steps:
   uses: "./containers/allel"
   runs: ["python"]
   args: [
-    "src/preprocessing/extract_sequences.py",
+    "src/_ganpreprocessing/extract_sequences.py",
     "data/Homo_sapiens.GRCh38.dna.chromosome.17.fa",
     "data/raw/brca2.vcf",
     "data/interim/sample_names.txt",
@@ -26,7 +26,7 @@ steps:
   uses: "./containers/torch"
   runs: ["python"]
   args: [
-    "src/gan_model/train_gan.py",
+    "src/gan_git/train_gan.py",
     "data/processed/brca2_Seqs.feather",
     "output/models/gan_latent_dim_25"
     "--epochs",
@@ -45,7 +45,7 @@ steps:
   uses: "./containers/allel"
   runs: ["python"]
   args: [
-    "src/frequency_model/sample_frequencies.py", 
+    "src/naive_fit/sample_frequencies.py", 
     "data/raw/brca2.vcf",
     "output/models/sample_freqs.json"
   ]
@@ -54,11 +54,17 @@ steps:
   uses: "./containers/allel"
   runs: ["python"]
   args: [
-    "generate_naive_samples.py",
+    "src/naive_generation/generate_naive_samples.py",
     "output/models/sample_freqs.json",
     "output/samples/naive_samples.vcf",
     "-n",
     "10000"
   ]
 
-
+- id: "em_smm_fit"
+  uses: "./containers/numba"
+  runs: ["python"]
+  args: [
+    "src/em_smm_fit/fit_smm.py",
+    "data/raw/brca2.vcf"
+  ]
