@@ -137,6 +137,7 @@ dmypy.json
 *.gff3
 *.gff3.gz
 *.csv
+data/*.json
 
 # saved models
 *.pt
