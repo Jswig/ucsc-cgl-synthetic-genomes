@@ -77,7 +77,6 @@ def train(
 				G_loss = -torch.mean(fake_score)
 				G_loss.backward()
 				optimizer_G.step()
-
 				print(
 					f"[epoch : {k}] [sample : {i} ] [ generator loss : {G_loss}] [ discriminator loss: {D_loss}]"
 				)

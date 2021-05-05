@@ -60,3 +60,8 @@ python src/frequency_generation/generate_naive_samples.py \
 Omit the first command if `sample_freqs.json` already 
 exists
 
+## References
+
+My term papers with explanations of relevant theoretical aspects are 
+[here](https://github.com/Jswig/ucsc-gi-papers).
+
