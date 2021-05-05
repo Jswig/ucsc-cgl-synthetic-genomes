@@ -5,6 +5,9 @@ import json
 def samples_to_vcf(
 	freqs_dict: dict, output: str, n_samples: int, samples: np.ndarray, chrom: str
 ):
+	"""
+	Writes VCF file with given variants and haplotype samples to output
+	"""
 	vcf_header = (
 		"##fileformat=VCFv4.1\n"
 		"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t"
