@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 class ResidualBlock(nn.Module):
-	def __init__(self, d_in, d_out, seq_len, relu): #pick nn.ReLU for generator, nn.LeakyRelu for discriminator
+	def __init__(self, d_in: int, d_out: int, seq_len: int, relu: nn.Module): #pick nn.ReLU for generator, nn.LeakyRelu for discriminator
 		super().__init__()
 		self.lnorm_1 = nn.LayerNorm([d_in, seq_len])
 		self.relu_1 = relu()
@@ -16,7 +16,7 @@ class ResidualBlock(nn.Module):
 		self.conv_2 = nn.Conv1d(in_channels=d_in, out_channels=d_out, kernel_size=5, padding = 2)
 		# bias not needed, already present by default in Conv1d()
 		
-	def forward(self, x):
+	def forward(self, x: torch.Tensor):
 		x_0 = x
 		y = self.lnorm_1(x_0)
 		x = self.relu_1(x)
@@ -28,7 +28,7 @@ class ResidualBlock(nn.Module):
 
 
 class Generator(nn.Module):
-	def __init__(self, seq_len, batch_size, latent_dim=100):
+	def __init__(self, seq_len: int, batch_size: int, latent_dim: int=100):
 		super(Generator, self).__init__()
 		# layers
 		self.lnorm_in = nn.LayerNorm(latent_dim)
@@ -44,7 +44,7 @@ class Generator(nn.Module):
 		self.latent_dim = latent_dim
 		self.batch_size = batch_size
 
-	def forward(self,x):
+	def forward(self, x: torch.Tensor):
 		x = self.lnorm_in(x)
 		x = self.linear_in(x)    
 		x = torch.reshape(x, (self.batch_size, self.latent_dim, self.seq_len))
@@ -55,7 +55,7 @@ class Generator(nn.Module):
 
 		
 class Discriminator(nn.Module):
-	def __init__(self, seq_len, batch_size, latent_dim=100):
+	def __init__(self, seq_len: int, batch_size: int, latent_dim: int=100):
 		super().__init__()
 		# layers
 		self.conv_in = nn.Conv1d(in_channels=4, out_channels=latent_dim, kernel_size=1)
@@ -71,7 +71,7 @@ class Discriminator(nn.Module):
 		self.latent_dim = latent_dim
 		self.batch_size = batch_size
 		
-	def forward(self, x):
+	def forward(self, x: torch.Tensor):
 		x = self.conv_in(x)
 		x = self.resblocks(x)
 		x = torch.reshape(x, (self.batch_size, self.latent_dim*self.seq_len))
@@ -92,7 +92,7 @@ class BRCADataset(Dataset):
 	def __len__(self):
 		return(len(self.sequences))
 
-	def __getitem__(self, idx):
+	def __getitem__(self, idx: int):
 		item = (pd
 			.get_dummies(self.sequences.iloc[idx,:])
 			.values 
@@ -102,8 +102,10 @@ class BRCADataset(Dataset):
 		return torch.from_numpy(item)
 
 
-def compute_gradient_penalty(discriminator, real_samples, fake_samples):
-	"""Calculates the gradient penalty loss for WGAN GP"""
+def compute_gradient_penalty(discriminator: nn.Module, real_samples: torch.Tensor, fake_samples: torch.Tensor):
+	"""
+	Calculates the gradient penalty loss for WGAN GP
+	"""
 
 	batch_size = real_samples.shape[0]
 	# Random weight term for interpolation between real and fake samples

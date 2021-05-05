@@ -34,7 +34,7 @@ def generate_samples(
 		)
 	if log:
 		with open(log_path, 'w') as log:
-			l_samples = {k: list(v) for (k,v) in samples}
+			l_samples = {k: list(v) for (k,v) in samples	}
 			json.dump(l_samples, log)  
 	return samples
 
@@ -44,4 +44,4 @@ if __name__ == '__main__':
 		# note: ensure keys in JSON are sorted 
 		freqs_dict = json.load(f)
 	samples = generate_samples(freqs_dict, args.n_samples)
-	samples_to_vcf(freqs_dict, args.output, args.n_samples, samples)
+	samples_to_vcf(freqs_dict, args.output, args.n_samples, samples, '13')

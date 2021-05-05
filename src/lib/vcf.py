@@ -3,7 +3,7 @@ import numpy as np
 import json
 
 def samples_to_vcf(
-	freqs_dict: dict, output: str, n_samples: int, samples: np.ndarray
+	freqs_dict: dict, output: str, n_samples: int, samples: np.ndarray, chrom: str
 ):
 	vcf_header = (
 		"##fileformat=VCFv4.1\n"
@@ -22,7 +22,7 @@ def samples_to_vcf(
 			haplos = samples[pos]
 			haplo_1, haplo_2 = np.split(haplos, 2) # haplos has length 2*n_samples 
 			for i, (ref, var) in enumerate(zip(refs, variants)): 
-				vcf.write(f'13\t{pos}\t.\t{ref}\t{var}\t.\t.\t.\tGT\t')
+				vcf.write(f'{chrom}\t{pos}\t.\t{ref}\t{var}\t.\t.\t.\tGT\t')
 				haplo_1_has_var = np.where(haplo_1 == i, 1, 0)
 				haplo_2_has_var = np.where(haplo_2 == i, 1, 0)
 				genotypes = [
