@@ -12,7 +12,7 @@ parser.add_argument('input', help='Input VCF file')
 parser.add_argument(
 	'--n_iterations', type=int, default=20, help="Number of iterations of EM algorithm"
 )
-parser.add_arguments(
+parser.add_argument(
 	'-K', type=int, default=10, help="Number of components of mixture model"
 )
 
