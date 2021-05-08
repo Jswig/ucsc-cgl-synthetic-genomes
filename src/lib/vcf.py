@@ -18,7 +18,6 @@ def samples_to_vcf(
 
 	with open(output, 'w') as vcf:
 		vcf.write(vcf_header)
-
 		for pos, v in tqdm(freqs_dict.items()):
 			refs = v['REF']
 			variants = v['ALT']

@@ -75,7 +75,6 @@ if __name__ == '__main__':
 			end=args.end,
 		)
 
-
 		# extract_from_vcf(
 		#     reference_fasta='data/Homo_sapiens.GRCh38.dna.chromosome.17.fa', 
 		#     variants_vcf='data/raw/brca1.vcf',
