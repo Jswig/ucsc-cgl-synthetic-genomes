@@ -128,3 +128,10 @@ Look for concurrence with James' results
     - estimating information complexity of genomics sequences
     - 
 
+# 06-05-2021
+
+- Instead of conditioning one variant on the other, use information on whether variants 
+are benign or pathogenic. Filter out all samples that are (doubly) known pathogenic as a post-processing 
+step 
+
+
