@@ -35,9 +35,9 @@ def fit_em_smm(variants_vcf: str, n_iterations: int, K: int):
 		.groupby('POS')
 		.count()
 		.sort_values(by='REF')
-	)[-1]
-	n_loci = len(genotypes)
-
+	)['REF'][-1]
+	n_loci = genotypes.shape[0]
+	n_samples = genotypes.shape[1]
 	# em initialization
 	groups = rng.integers(0,5, size=n_samples)
 	group_ini = rng.random(size=6)
