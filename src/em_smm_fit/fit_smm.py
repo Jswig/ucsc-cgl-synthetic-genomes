@@ -18,6 +18,10 @@ parser.add_argument(
 
 rng = np.random.default_rng(42)
 
+@numba.jit
+def _em_loop():
+	pass
+
 def fit_em_smm(variants_vcf: str, n_iterations: int, K: int):
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
@@ -29,25 +33,39 @@ def fit_em_smm(variants_vcf: str, n_iterations: int, K: int):
 	genotypes = np.where(genotypes == -1, 0, genotypes)
 	haplo_1 = genotypes[:,:,0]
 	haplo_2 = genotypes[:,:,1]
+	
+	# TODO better representation of haplotypes using ordinal encoding
 
 	# find locus with largest number of variants in sample
+	# add 1 to account for fact that we always have a reference
 	max_n_variants = (variants
 		.groupby('POS')
 		.count()
 		.sort_values(by='REF')
-	)['REF'][-1]
+	)['REF'][-1] + 1 
 	n_loci = genotypes.shape[0]
-	n_samples = genotypes.shape[1]
+	n_samples = genotypes.shape[1] * 2 # we treat each chromosome independantly
+
 	# em initialization
-	groups = rng.integers(0,5, size=n_samples)
+	groups_e_ini = rng.random(size=(K, n_samples))
+	groups_e = group_e_ini / np.sum(groups_e_ini, axis=1, keepdims=1)
 	group_ini = rng.random(size=6)
-	group_probs = group_ini / np.sum(group_ini) # make these probability vectors
+	group_probs = group_ini / np.sum(group_ini) # make this a probability vector
 	variant_ini = rng.random(size=(K, n_loci, max_n_variants)) 
-	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1)
+	# TODO: add step filtering this to correct number of variants
+	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1) # make these  probability vectors
 
 	# TODO: EM loop
 	for i in range(n_iterations):
-		pass
+		# group belonging update
+		for r in range(n_samples):
+			# TODO group belonging update
+			pass
+		# group probability update
+		# TODO 
+		
+		# variant probabilities update
+		# TODO
 
 if __name__ == '__main__':
 	args = parser.parse_args()
