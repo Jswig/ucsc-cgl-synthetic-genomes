@@ -30,7 +30,7 @@ def _em_loop(
 	group_e: np.ndarray,
 	group_probs: np.ndarray, 
 	variant_probs: np.ndarray, 
-	haplotypese: np.ndarray,
+	haplotypes: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:	
 
 	all_variant_cols = np.arange(n_loci)
