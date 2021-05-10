@@ -74,7 +74,7 @@ def _encode_haplotypes(variants_pos: np.ndarray, haplos: np.ndarray) -> np.ndarr
 			haplos_encoded[:,k] = np.where(
 				haplos[:, haplos_idx] == 1, idx+1, haplos[:, haplos_idx]
 			)
-        haplos_idx += 1
+        	haplos_idx += 1
 	return haplos_encoded
 
 def fit_em_smm(
