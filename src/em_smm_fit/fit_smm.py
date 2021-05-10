@@ -3,8 +3,7 @@ import argparse
 import multiprocessing
 import numpy as np
 
-from numba import jit 
-# from numba import njit, prange
+from numba import jit, prange
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser(
@@ -17,29 +16,28 @@ parser.add_argument(
 parser.add_argument(
 	'-K', type=int, default=10, help="Number of components of mixture model"
 )
-
 rng = np.random.default_rng(42)
 
-@jit(nopython=False, parallel=True)
-def _em_loop_iteration(
+# @jit(nopython=False, parallel=True, fastmath=True)
+def _em_loop(
 	n_iterations: int,
 	K: int,
 	n_samples: int,
 	n_loci: int,
+	max_n_variants: int,
 	group_e: np.ndarray,
 	group_probs: np.ndarray, 
 	variant_probs: np.ndarray, 
-	haplotypese: np.ndarray
+	haplotypese: np.ndarray,
 ):	
-
 	all_variant_cols = np.arange(n_loci)
 
-	for i in tqdm(range(n_iterations)):
+	for i in range(n_iterations):
 		# group expectation by sample update
 		for r in range(n_samples): # this can be parallelized
 			probs_alpha = [
 				group_probs[alpha] * np.prod(
-					variant_probs[alpha, all_variant_cols, haplotypes[r]]``
+					variant_probs[alpha, all_variant_cols, haplotypes[r]]
 				)
 				for alpha in range(K)
 			]
@@ -47,19 +45,21 @@ def _em_loop_iteration(
 				probs_alpha[alpha] / np.sum(probs_alpha) 
 				for alpha in range(K)
 			]
+		# NOTE if paralellizing, might need to be careful about assigning to group_e,
+		# might trigger a race condition
 
 		# group probability update
-		group_probs = np.sum(groups_e) / n_samples
+		group_probs = np.sum(groups_e, axis=0) / n_samples
 		
 		# variant probabilities update
-		# TODO initialize nvariant_probs
 		for alpha in range(K): # this can also be parallelized
-			group_probs[alpha]*n_samples
+			norm_ct = group_probs[alpha]*n_samples
 			# TODO internal loops 
 			# iteration over locus?
-	
-		# TODO variant_probs = n_variant_probs```
-
+			for k in range(n_loci):
+				for i in range(max_n_variants):
+					variant_samples = np.where(haplotypes[:,k] == i, 1, 0) # find samples with given variant
+					group_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
 	return (group_probs, groups_e, variant_probs)
 
 def fit_em_smm(variants_vcf: str, n_iterations: int, K: int):
@@ -97,7 +97,9 @@ def fit_em_smm(variants_vcf: str, n_iterations: int, K: int):
 	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1) # make these  probability vectors
 
 	# EM Loop
-		
+	# TODO: add EM loop
+	# TODO: serialize results
+
 if __name__ == '__main__':
 	args = parser.parse_args()
 
