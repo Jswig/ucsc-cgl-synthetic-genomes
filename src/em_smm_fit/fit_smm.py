@@ -20,7 +20,7 @@ parser.add_argument(
 )
 rng = np.random.default_rng(42)
 
-# @jit(nopython=False, parallel=True, fastmath=True)
+@jit(nopython=False, parallel=True, fastmath=True)
 def _em_loop(
 	n_iterations: int,
 	K: int,
@@ -50,7 +50,6 @@ def _em_loop(
 			]
 		# NOTE if paralellizing, might need to be careful about assigning to group_e,
 		# might trigger a race condition
-
 		# group probability update
 		group_probs = np.sum(groups_e, axis=0) / n_samples
 		
@@ -61,7 +60,22 @@ def _em_loop(
 				for i in range(max_n_variants):
 					variant_samples = np.where(haplotypes[:,k] == i, 1, 0) # find samples with given variant
 					group_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
+					# NOTE same potential race condition issue here
 	return (group_probs, groups_e, variant_probs)
+
+@jit(nopython=False, parallel=True)
+def _encode_haplotypes(variants_pos: np.ndarray, haplos: np.ndarray) -> np.ndarray:
+
+	haplos_encoded = np.full((n_samples, n_loci), -1)
+	haplos_idx = 0 
+	for k, pos in enumerate(np.unique(variants_pos)):
+		n_variants = np.sum(variants_pos == pos)
+		for idx in range(n_variants):
+			haplos_encoded[:,k] = np.where(
+				haplos[:, haplos_idx] == 1, idx+1, haplos[:, haplos_idx]
+			)
+        haplos_idx += 1
+	return haplos_encoded
 
 def fit_em_smm(
 	variants_vcf: str, n_iterations: int, K: int
@@ -78,9 +92,6 @@ def fit_em_smm(
 	haplo_1 = genotypes[:,:,0]
 	haplo_2 = genotypes[:,:,1]
 	
-	# TODO better representation of haplotypes using ordinal encoding?
-	# not sure if this is the best option
-
 	# find locus with largest number of variants in sample
 	# add 1 to account for fact that we always have a reference
 	max_n_variants = (variants
@@ -88,9 +99,15 @@ def fit_em_smm(
 		.count()
 		.sort_values(by='REF')
 	)['REF'][-1] + 1 
-	n_loci = genotypes.shape[0]
-	n_samples = genotypes.shape[1] * 2 # we treat each chromosome independantly
+	n_loci = len(variants['POS'].unique())
+	n_samples = genotypes.shape[1] 
 
+	# TODO better representation of haplotypes using ordinal encoding (still needs 
+	# testing)
+	haplos = np.hstack((haplo_1, haplo_2)).T
+	haplos = _encode_haplotypes(variants['POS'], haplos) 
+
+	# TODO check initialization for correctness
 	# em initialization
 	group_e_ini = rng.random(size=(K, n_samples))
 	group_e = group_e_ini / np.sum(groups_e_ini, axis=1, keepdims=1)
@@ -99,7 +116,6 @@ def fit_em_smm(
 	variant_ini = rng.random(size=(K, n_loci, max_n_variants)) 
 	# TODO: add step filtering this to correct number of variants
 	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1) # make these  probability vectors
-
 	# EM Loop
 	return _em_loop(
 		n_iterations,
