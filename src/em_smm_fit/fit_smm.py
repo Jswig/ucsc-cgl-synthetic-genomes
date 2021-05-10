@@ -2,6 +2,7 @@ import allel
 import argparse
 import multiprocessing
 import numpy as np
+import os
 
 from numba import jit, prange
 from tqdm import tqdm
@@ -10,6 +11,7 @@ parser = argparse.ArgumentParser(
 	description='fit symmetric mixture model'
 )
 parser.add_argument('input', help='Input VCF file')
+parser.add_argument('ouput', help='Output path')
 parser.add_argument(
 	'--n_iterations', type=int, default=20, help="Number of iterations of EM algorithm"
 )
@@ -29,7 +31,8 @@ def _em_loop(
 	group_probs: np.ndarray, 
 	variant_probs: np.ndarray, 
 	haplotypese: np.ndarray,
-):	
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:	
+
 	all_variant_cols = np.arange(n_loci)
 
 	for i in range(n_iterations):
@@ -54,15 +57,16 @@ def _em_loop(
 		# variant probabilities update
 		for alpha in range(K): # this can also be parallelized
 			norm_ct = group_probs[alpha]*n_samples
-			# TODO internal loops 
-			# iteration over locus?
 			for k in range(n_loci):
 				for i in range(max_n_variants):
 					variant_samples = np.where(haplotypes[:,k] == i, 1, 0) # find samples with given variant
 					group_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
 	return (group_probs, groups_e, variant_probs)
 
-def fit_em_smm(variants_vcf: str, n_iterations: int, K: int):
+def fit_em_smm(
+	variants_vcf: str, n_iterations: int, K: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
 		.drop(['ALT_2', 'ALT_3'], axis=1) # ALT_2, ALT_3 are always empty
@@ -97,14 +101,26 @@ def fit_em_smm(variants_vcf: str, n_iterations: int, K: int):
 	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1) # make these  probability vectors
 
 	# EM Loop
-	# TODO: add EM loop
-	# TODO: serialize results
-
+	return _em_loop(
+		n_iterations,
+		K,
+		n_samples,
+		n_loci,
+		max_n_variants,
+		group_e,
+		group_probs,
+		variant_probs,
+		haplotypes,
+	)
+	
 if __name__ == '__main__':
 	args = parser.parse_args()
 
-	fit_em_smm(
+	(group_probs, groups_e, variant_probs) = fit_em_smm(
 		variants_vcf=args.input,
 		n_iterations=args.n_iterations,
 		K=args.K,
 	)
+	np.save(os.path.join(args.output, 'group_probs.npy'), group_probs, allow_pickle=False)
+	np.save(os.path.join(args.output, 'group_e.npy'), group_e, allow_pickle=False)
+	np.save(os.path.join(args.output, 'variant_probs.npy'), variant_probs, allow_pickle=False)
