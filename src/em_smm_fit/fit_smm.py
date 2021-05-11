@@ -6,6 +6,7 @@ import os
 
 from numba import jit, prange
 from tqdm import tqdm
+from typing import Tuple
 
 parser = argparse.ArgumentParser(
 	description='fit symmetric mixture model'
@@ -31,19 +32,21 @@ def _em_loop(
 	group_probs: np.ndarray, 
 	variant_probs: np.ndarray, 
 	haplotypes: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:	
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:	
 
-	all_variant_cols = np.arange(n_loci)
+	flattened_offset = np.arange(0, n_loci*2, 2)
 
 	for i in range(n_iterations):
 		# group expectation by sample update
 		for r in range(n_samples): # this can be parallelized
-			probs_alpha = [
+			probs_alpha = np.array([
 				group_probs[alpha] * np.prod(
-					variant_probs[alpha, all_variant_cols, haplotypes[r]]
+					variant_probs[alpha].flatten()[flattened_offset + haplos[r]] 
+					# workaround for not being able to use more than one advanced index in numba
+					# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
 				)
 				for alpha in range(K)
-			]
+			])
 			group_e[r,:] = [
 				probs_alpha[alpha] / np.sum(probs_alpha) 
 				for alpha in range(K)
@@ -74,7 +77,7 @@ def _encode_haplotypes(variants_pos: np.ndarray, haplos: np.ndarray) -> np.ndarr
 			haplos_encoded[:,k] = np.where(
 				haplos[:, haplos_idx] == 1, idx+1, haplos[:, haplos_idx]
 			)
-        	haplos_idx += 1
+		haplos_idx += 1
 	return haplos_encoded
 
 def fit_em_smm(
@@ -105,7 +108,7 @@ def fit_em_smm(
 	# TODO better representation of haplotypes using ordinal encoding (still needs 
 	# testing)
 	haplos = np.hstack((haplo_1, haplo_2)).T
-	haplos = _encode_haplotypes(variants['POS'], haplos) 
+	haplos = _encode_haplotypes(variants['POS'].values, haplos) 
 
 	# TODO check initialization for correctness
 	# em initialization
@@ -126,7 +129,7 @@ def fit_em_smm(
 		group_e,
 		group_probs,
 		variant_probs,
-		haplotypes,
+		haplos,
 	)
 	
 if __name__ == '__main__':
