@@ -39,12 +39,13 @@ def _em_loop(
 	for i in range(n_iterations):
 		# group expectation by sample update
 		for r in range(n_samples): # this can be parallelized
+			log_probs = np.log(variant_probs)
 			probs_alpha = np.array([
-				group_probs[alpha] * np.prod(
-					variant_probs[alpha].flatten()[flattened_offset + haplos[r]] 
+				group_probs[alpha] * np.exp(np.sum(
+					log_probs[alpha].flatten()[flattened_offset + haplotypes[r]] 
 					# workaround for not being able to use more than one advanced index in numba
 					# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
-				)
+				))
 				for alpha in range(K)
 			])
 			group_e[r,:] = [
@@ -62,7 +63,7 @@ def _em_loop(
 			for k in range(n_loci):
 				for i in range(max_n_variants):
 					variant_samples = np.where(haplotypes[:,k] == i, 1, 0) # find samples with given variant
-					group_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
+					variant_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
 					# NOTE same potential race condition issue here
 	return (group_probs, groups_e, variant_probs)
 
