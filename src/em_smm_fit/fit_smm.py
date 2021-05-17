@@ -83,7 +83,7 @@ def _encode_haplotypes(variants_pos: np.ndarray, haplos: np.ndarray) -> np.ndarr
 
 def fit_em_smm(
 	variants_vcf: str, n_iterations: int, K: int
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
