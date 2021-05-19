@@ -21,7 +21,7 @@ parser.add_argument(
 )
 rng = np.random.default_rng(42)
 
-@jit(nopython=False, parallel=True, fastmath=True)
+@jit(nopython=True, fastmath=True)
 def _em_loop(
 	n_iterations: int,
 	K: int,
@@ -37,25 +37,25 @@ def _em_loop(
 	flattened_offset = np.arange(0, n_loci*2, 2)
 
 	for i in range(n_iterations):
-		# group expectation by sample update
 		for r in range(n_samples): # this can be parallelized
-			log_probs = np.log(variant_probs)
-			probs_alpha = np.array([
-				group_probs[alpha] * np.exp(np.sum(
-					log_probs[alpha].flatten()[flattened_offset + haplotypes[r]] 
-					# workaround for not being able to use more than one advanced index in numba
-					# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
-				))
+			log_variant_probs = np.log(variant_probs)
+			log_probs_alpha = np.array([
+				np.log(group_probs[alpha]) + np.sum(
+					log_variant_probs[alpha].flatten()[flattened_offset + haplos[r]]
+				)
+				# workaround for not being able to use more than one advanced index in numba
+				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
+				for alpha in range(K)
+			]) 
+			new_group_e = np.array([
+				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha)))
 				for alpha in range(K)
 			])
-			group_e[r,:] = [
-				probs_alpha[alpha] / np.sum(probs_alpha) 
-				for alpha in range(K)
-			]
+			group_e[r,:] = np.exp(new_group_e)
 		# NOTE if paralellizing, might need to be careful about assigning to group_e,
 		# might trigger a race condition
 		# group probability update
-		group_probs = np.sum(groups_e, axis=0) / n_samples
+		group_probs = np.sum(group_e, axis=0) / n_samples
 		
 		# variant probabilities update
 		for alpha in range(K): # this can also be parallelized
@@ -67,7 +67,7 @@ def _em_loop(
 					# NOTE same potential race condition issue here
 	return (group_probs, groups_e, variant_probs)
 
-@jit(nopython=False, parallel=True)
+@jit(nopython=True, parallel=True)
 def _encode_haplotypes(variants_pos: np.ndarray, haplos: np.ndarray) -> np.ndarray:
 
 	haplos_encoded = np.full((n_samples, n_loci), -1)
@@ -136,7 +136,7 @@ def fit_em_smm(
 if __name__ == '__main__':
 	args = parser.parse_args()
 
-	(group_probs, groups_e, variant_probs) = fit_em_smm(
+	(group_probs, group_e, variant_probs) = fit_em_smm(
 		variants_vcf=args.input,
 		n_iterations=args.n_iterations,
 		K=args.K,
