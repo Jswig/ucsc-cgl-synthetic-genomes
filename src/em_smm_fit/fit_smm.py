@@ -106,14 +106,15 @@ def fit_em_smm(
 
 	haplos = np.hstack((haplo_1, haplo_2)).T
    	# em initialization
-	group_e_ini = rng.random(size=(K, n_samples))
+	group_e_ini = rng.random(size=(n_samples, K))
 	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
 	group_ini = rng.random(size=6)
 	group_probs = group_ini / np.sum(group_ini) # make this a probability vector
 	variant_ini = rng.random(size=(K, n_loci, max_n_variants)) 
+	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1) 
 	# TODO: add step filtering this to correct number of variants
-	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1) # make these  probability vectors
-	# EM Loop
+
+	# EM loop
 	return _em_loop(
 		n_iterations,
 		K,
