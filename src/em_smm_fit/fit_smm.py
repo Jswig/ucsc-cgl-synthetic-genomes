@@ -1,11 +1,8 @@
 import allel
 import argparse
-import multiprocessing
 import numpy as np
 import os
-
-from numba import jit, prange
-from tqdm import tqdm
+from numba import jit
 from typing import Tuple
 
 parser = argparse.ArgumentParser(
@@ -42,7 +39,7 @@ def _em_loop(
 			log_variant_probs = np.log(variant_probs)
 			log_probs_alpha = np.array([
 				np.log(group_probs[alpha]) + np.sum(
-					log_variant_probs[alpha].flatten()[flattened_offset + haplos[r]]
+					log_variant_probs[alpha].flatten()[flattened_offset + haplotypes[r]]
 				)
 				# workaround for not being able to use more than one advanced index in numba
 				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
@@ -66,11 +63,11 @@ def _em_loop(
 					variant_samples = np.where(haplotypes[:,k] == i, True, False) # find samples with given variant
 					variant_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
 					# NOTE same potential race condition issue here
-	return (group_probs, groups_e, variant_probs)
+	return (group_probs, group_e, variant_probs)
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True)
 def _encode_haplotypes(
-	variants_pos: np.ndarray, haplos: np.ndarray, n_samples: int
+	variants_pos: np.ndarray, haplos: np.ndarray, n_samples: int, n_loci: int,
 ) -> np.ndarray:
 
 	haplos_encoded = np.full((n_samples, n_loci), -1)
@@ -87,7 +84,6 @@ def _encode_haplotypes(
 def fit_em_smm(
 	variants_vcf: str, n_iterations: int, K: int
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
 		.drop(['ALT_2', 'ALT_3'], axis=1) # ALT_2, ALT_3 are always empty
@@ -110,7 +106,7 @@ def fit_em_smm(
 	n_samples = genotypes.shape[1] 
 
 	haplos = np.hstack((haplo_1, haplo_2)).T
-	haplos = _encode_haplotypes(variants['POS'].values, haplos, n_samples) 
+	haplos = _encode_haplotypes(variants['POS'].values, haplos, n_samples, n_loci) 
 	# em initialization
 	group_e_ini = rng.random(size=(K, n_samples))
 	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
