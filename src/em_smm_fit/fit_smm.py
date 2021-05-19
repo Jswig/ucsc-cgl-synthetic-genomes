@@ -102,19 +102,15 @@ def fit_em_smm(
 		.groupby('POS')
 		.count()
 		.sort_values(by='REF')
-	)['REF'][-1] + 1 
+	)['REF'].values[-1] + 1 
 	n_loci = len(variants['POS'].unique())
 	n_samples = genotypes.shape[1] 
 
-	# TODO better representation of haplotypes using ordinal encoding (still needs 
-	# testing)
 	haplos = np.hstack((haplo_1, haplo_2)).T
 	haplos = _encode_haplotypes(variants['POS'].values, haplos) 
-
-	# TODO check initialization for correctness
 	# em initialization
 	group_e_ini = rng.random(size=(K, n_samples))
-	group_e = group_e_ini / np.sum(groups_e_ini, axis=1, keepdims=1)
+	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
 	group_ini = rng.random(size=6)
 	group_probs = group_ini / np.sum(group_ini) # make this a probability vector
 	variant_ini = rng.random(size=(K, n_loci, max_n_variants)) 
