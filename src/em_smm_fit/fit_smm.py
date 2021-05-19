@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(
 	description='fit symmetric mixture model'
 )
 parser.add_argument('input', help='Input VCF file')
-parser.add_argument('ouput', help='Output path')
+parser.add_argument('output', help='Output path')
 parser.add_argument(
 	'--n_iterations', type=int, default=20, help="Number of iterations of EM algorithm"
 )
