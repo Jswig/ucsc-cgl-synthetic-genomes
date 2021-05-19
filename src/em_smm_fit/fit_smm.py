@@ -62,7 +62,7 @@ def _em_loop(
 			norm_ct = group_probs[alpha]*n_samples
 			for k in range(n_loci):
 				for i in range(max_n_variants):
-					variant_samples = np.where(haplotypes[:,k] == i, 1, 0) # find samples with given variant
+					variant_samples = np.where(haplotypes[:,k] == i, True, False) # find samples with given variant
 					variant_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
 					# NOTE same potential race condition issue here
 	return (group_probs, groups_e, variant_probs)
