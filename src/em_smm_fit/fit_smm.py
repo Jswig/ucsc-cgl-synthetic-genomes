@@ -69,14 +69,13 @@ def _em_loop(
 def _encode_haplotypes(
 	variants_pos: np.ndarray, haplos: np.ndarray, n_samples: int, n_loci: int,
 ) -> np.ndarray:
-
-	haplos_encoded = np.full((n_samples, n_loci), -1)
+	haplos_encoded = np.full((n_samples, n_loci), 0)
 	haplos_idx = 0 
 	for k, pos in enumerate(np.unique(variants_pos)):
 		n_variants = np.sum(variants_pos == pos)
-		for idx in range(n_variants):
+		for idx in range(1, n_variants):
 			haplos_encoded[:,k] = np.where(
-				haplos[:, haplos_idx] == 1, idx+1, haplos[:, haplos_idx]
+				haplos[:, haplos_idx] == 1, idx, haplos_encoded[:,k]
 			)
 		haplos_idx += 1
 	return haplos_encoded
@@ -106,8 +105,7 @@ def fit_em_smm(
 	n_samples = genotypes.shape[1] 
 
 	haplos = np.hstack((haplo_1, haplo_2)).T
-	haplos = _encode_haplotypes(variants['POS'].values, haplos, n_samples, n_loci) 
-	# em initialization
+   	# em initialization
 	group_e_ini = rng.random(size=(K, n_samples))
 	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
 	group_ini = rng.random(size=6)
