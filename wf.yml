@@ -28,7 +28,7 @@ steps:
   args: [
     "src/gan_git/train_gan.py",
     "data/processed/brca2_Seqs.feather",
-    "output/models/gan_latent_dim_25"
+    "output/models/gan_latent_dim_25",
     "--epochs",
     "500",
     "--batch_size",

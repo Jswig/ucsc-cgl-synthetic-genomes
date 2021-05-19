@@ -132,12 +132,15 @@ dmypy.json
 *.fai
 *.feather
 *.fna
-*.vcf
-*.vcf.gz
+*.vcf*
+*.vcf.gz*
 *.gff3
 *.gff3.gz
 *.csv
-data/*.json
+*.tsv*
+./data/*.json
+./data/*.txt*
+data/*
 
 # saved models
 *.pt
