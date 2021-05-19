@@ -110,7 +110,7 @@ def fit_em_smm(
 	n_samples = genotypes.shape[1] 
 
 	haplos = np.hstack((haplo_1, haplo_2)).T
-	haplos = _encode_haplotypes(variants['POS'].values, haplos) 
+	haplos = _encode_haplotypes(variants['POS'].values, haplos, n_samples) 
 	# em initialization
 	group_e_ini = rng.random(size=(K, n_samples))
 	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
