@@ -51,7 +51,7 @@ def _em_loop(
 			])
 			group_e[r,:] = np.exp(new_group_e)
 		# NOTE if paralellizing, might need to be careful about assigning to group_e,
-		# might trigger a race condition
+		# cam trigger a race condition
 		# group probability update
 		group_probs = np.sum(group_e, axis=0) / n_samples
 		
@@ -93,32 +93,29 @@ def fit_em_smm(
 	genotypes = np.where(genotypes == -1, 0, genotypes)
 	haplo_1 = genotypes[:,:,0]
 	haplo_2 = genotypes[:,:,1]
-	
-	# find locus with largest number of variants in sample
-	# add 1 to account for fact that we always have a reference
-	max_n_variants = (variants
-		.groupby('POS')
+	haplos = np.hstack((haplo_1, haplo_2)).T
+
+	max_n_variants = (variants  # find locus with largest number of variants in sample
+		.groupby('POS')			# add 1 to account for fact that we always have a reference
 		.count()
 		.sort_values(by='REF')
 	)['REF'].values[-1] + 1 
 	n_loci = len(variants['POS'].unique())
-	n_samples = genotypes.shape[1] 
+	n_samples = haplos.shape[0] 
 
-	haplos = np.hstack((haplo_1, haplo_2)).T
+	haplos = _encode_haplotypes(variants['POS'].values, haplos, n_samples, n_loci)
+
    	# em initialization
 	group_e_ini = rng.random(size=(n_samples, K))
 	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
 	group_ini = rng.random(size=6)
 	group_probs = group_ini / np.sum(group_ini) # make this a probability vector
 	variant_ini = rng.random(size=(K, n_loci, max_n_variants)) 
-	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1) 
+	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1)
 	# TODO: add step filtering this to correct number of variants
 
-	# EM loop
 	return _em_loop(
-		n_iterations,
-		K,
-		n_samples,
+		n_iterations, K, n_samples,
 		n_loci,
 		max_n_variants,
 		group_e,
