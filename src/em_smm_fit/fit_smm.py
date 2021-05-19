@@ -37,6 +37,7 @@ def _em_loop(
 	flattened_offset = np.arange(0, n_loci*2, 2)
 
 	for i in range(n_iterations):
+		print('Starting iteration ', i, ' /', n_iterations, '\n')
 		for r in range(n_samples): # this can be parallelized
 			log_variant_probs = np.log(variant_probs)
 			log_probs_alpha = np.array([
