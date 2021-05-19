@@ -68,7 +68,9 @@ def _em_loop(
 	return (group_probs, groups_e, variant_probs)
 
 @jit(nopython=True, parallel=True)
-def _encode_haplotypes(variants_pos: np.ndarray, haplos: np.ndarray) -> np.ndarray:
+def _encode_haplotypes(
+	variants_pos: np.ndarray, haplos: np.ndarray, n_samples: int
+) -> np.ndarray:
 
 	haplos_encoded = np.full((n_samples, n_loci), -1)
 	haplos_idx = 0 
