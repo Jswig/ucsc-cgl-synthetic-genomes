@@ -45,7 +45,7 @@ def _em_loop(
 				for alpha in range(K)
 			]) 
 			new_group_e = np.array([
-				log_probs_alpha[alpha] - np.log(np.sum(np.exp(l og_probs_alpha)))
+				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha)))
 				for alpha in range(K)
 			])
 			group_e[r,:] = np.exp(new_group_e)
