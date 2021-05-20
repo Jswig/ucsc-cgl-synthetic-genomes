@@ -40,19 +40,18 @@ def _em_loop(
 			log_probs_alpha = np.array([
 				np.log(group_probs[alpha]) + np.sum(
 					log_variant_probs[alpha].flatten()[flattened_offset + haplotypes[r]]
-				)
-				# workaround for not being able to use more than one advanced index in numba
+				) # workaround for not being able to use more than one advanced index in numba
 				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
 				for alpha in range(K)
 			]) 
 			new_group_e = np.array([
-				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha)))
+				log_probs_alpha[alpha] - np.log(np.sum(np.exp(l og_probs_alpha)))
 				for alpha in range(K)
 			])
 			group_e[r,:] = np.exp(new_group_e)
 		# NOTE if paralellizing, might need to be careful about assigning to group_e,
-		# cam trigger a race condition
-		# group probability update
+		# can trigger a race condition
+
 		group_probs = np.sum(group_e, axis=0) / n_samples
 		
 		# variant probabilities update
