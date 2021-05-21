@@ -69,7 +69,8 @@ steps:
     "data/raw/brca2.vcf",
     "output/models",
     "--n_iterations",
-    "100",
+    "2",
     "-K",
     "6"
   ]
+  optio
