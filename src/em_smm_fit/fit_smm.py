@@ -45,7 +45,7 @@ def _em_loop(
 				for alpha in range(K)
 			]) 
 			new_group_e = np.array([
-				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha)))
+				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha))) # NOTE this is probably where the NaNs propagate
 				for alpha in range(K)
 			])
 			group_e[r,:] = np.exp(new_group_e)
@@ -53,10 +53,10 @@ def _em_loop(
 		# can trigger a race condition
 
 		group_probs = np.sum(group_e, axis=0) / n_samples
-		
+
 		# variant probabilities update
 		for alpha in range(K): # this can also be parallelized
-			norm_ct = group_probs[alpha]*n_samples
+			norm_ct = group_probs[alpha] * n_samples
 			for k in range(n_loci):
 				for i in range(max_n_variants):
 					variant_samples = np.where(haplotypes[:,k] == i, True, False) # find samples with given variant
@@ -66,17 +66,19 @@ def _em_loop(
 
 @jit(nopython=True)
 def _encode_haplotypes(
-	variants_pos: np.ndarray, haplos: np.ndarray, n_samples: int, n_loci: int,
+ variants_pos: np.ndarray, haplos: np.ndarray, n_samples: int, n_loci: int,
 ) -> np.ndarray:
 	haplos_encoded = np.full((n_samples, n_loci), 0)
 	haplos_idx = 0 
 	for k, pos in enumerate(np.unique(variants_pos)):
 		n_variants = np.sum(variants_pos == pos)
-		for idx in range(1, n_variants):
-			haplos_encoded[:,k] = np.where(
+		for idx in range(1, n_variants+1):
+			res = np.where(
 				haplos[:, haplos_idx] == 1, idx, haplos_encoded[:,k]
 			)
-		haplos_idx += 1
+			haplos_encoded[:,k] = res
+			print(res)
+			haplos_idx += 1
 	return haplos_encoded
 
 def fit_em_smm(
