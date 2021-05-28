@@ -24,7 +24,7 @@ def _em_loop(
 	K: int,
 	n_samples: int,
 	n_loci: int,
-	max_n_variants: int,
+	n_variants_pos: np.ndarray,
 	group_e: np.ndarray,
 	group_probs: np.ndarray, 
 	variant_probs: np.ndarray, 
@@ -36,7 +36,7 @@ def _em_loop(
 	for i in range(n_iterations):
 		print('Starting iteration ', i, ' /', n_iterations, '\n')
 		for r in range(n_samples): # this can be parallelized
-			log_variant_probs = np.log(variant_probs)
+			log_variant_probs = np.log(variant_probs) # NOTE might cause problems for variant probs that are 0
 			log_probs_alpha = np.array([
 				np.log(group_probs[alpha]) + np.sum(
 					log_variant_probs[alpha].flatten()[flattened_offset + haplotypes[r]]
@@ -44,6 +44,7 @@ def _em_loop(
 				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
 				for alpha in range(K)
 			]) 
+			print(log_probs_alpha) # diagnostic for NaNs
 			new_group_e = np.array([
 				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha))) # NOTE this is probably where the NaNs propagate
 				for alpha in range(K)
@@ -53,12 +54,13 @@ def _em_loop(
 		# can trigger a race condition
 
 		group_probs = np.sum(group_e, axis=0) / n_samples
+		print(group_probs)
 
 		# variant probabilities update
 		for alpha in range(K): # this can also be parallelized
 			norm_ct = group_probs[alpha] * n_samples
 			for k in range(n_loci):
-				for i in range(max_n_variants):
+				for i in range(n_variants_pos[k]): # ignore placeholders in array
 					variant_samples = np.where(haplotypes[:,k] == i, True, False) # find samples with given variant
 					variant_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
 					# NOTE same potential race condition issue here
@@ -96,11 +98,12 @@ def fit_em_smm(
 	haplo_2 = genotypes[:,:,1]
 	haplos = np.hstack((haplo_1, haplo_2)).T
 
-	max_n_variants = (variants  # find locus with largest number of variants in sample
+	n_variants_pos = (variants  # find number of variants by position
 		.groupby('POS')			# add 1 to account for fact that we always have a reference
 		.count()
-		.sort_values(by='REF')
-	)['REF'].values[-1] + 1 
+		.values) + 1
+	max_n_variants = np.sort(n_variants_pos)[-1]
+
 	n_loci = len(variants['POS'].unique())
 	n_samples = haplos.shape[0] 
 
@@ -118,7 +121,7 @@ def fit_em_smm(
 	return _em_loop(
 		n_iterations, K, n_samples,
 		n_loci,
-		max_n_variants,
+		n_variants_pos,
 		group_e,
 		group_probs,
 		variant_probs,
