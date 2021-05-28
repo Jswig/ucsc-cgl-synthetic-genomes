@@ -54,7 +54,8 @@ def _em_loop(
 		# can trigger a race condition
 
 		group_probs = np.sum(group_e, axis=0) / n_samples
-		print(group_probs)
+		if np.isnan(np.sum(group_probs)):
+			raise ValueError('group_probs contains NaNs')
 
 		# variant probabilities update
 		for alpha in range(K): # this can also be parallelized
