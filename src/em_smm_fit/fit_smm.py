@@ -99,7 +99,7 @@ def fit_em_smm(
 
 	n_variants_pos = (variants  # find number of variants by position
 		.groupby('POS')			# add 1 to account for fact that we always have a reference
-		.count()
+		.count()['REF']
 		.values) + 1
 	max_n_variants = np.sort(n_variants_pos)[-1]
 
@@ -129,7 +129,6 @@ def fit_em_smm(
 	
 if __name__ == '__main__':
 	args = parser.parse_args()
-
 	(group_probs, group_e, variant_probs) = fit_em_smm(
 		variants_vcf=args.input,
 		n_iterations=args.n_iterations,
