@@ -44,7 +44,6 @@ def _em_loop(
 				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
 				for alpha in range(K)
 			]) 
-			print(log_probs_alpha) # diagnostic for NaNs
 			new_group_e = np.array([
 				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha))) # NOTE this is probably where the NaNs propagate
 				for alpha in range(K)
@@ -52,8 +51,8 @@ def _em_loop(
 			group_e[r,:] = np.exp(new_group_e)
 		# NOTE if paralellizing, might need to be careful about assigning to group_e,
 		# can trigger a race condition
-
 		group_probs = np.sum(group_e, axis=0) / n_samples
+		print(group_probs) # FIXME remove diagnostic 
 		if np.isnan(np.sum(group_probs)):
 			raise ValueError('group_probs contains NaNs')
 
