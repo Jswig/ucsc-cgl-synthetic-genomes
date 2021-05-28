@@ -48,13 +48,14 @@ def _em_loop(
 				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha))) # NOTE this is probably where the NaNs propagate
 				for alpha in range(K)
 			])
-			group_e[r,:] = np.exp(new_group_e)
+			if np.isinf(np.max(new_group_e)):
+				raise ValueError('infinite expectation')
+			else:
+				group_e[r,:] = np.exp(new_group_e)
 		# NOTE if paralellizing, might need to be careful about assigning to group_e,
 		# can trigger a race condition
 		group_probs = np.sum(group_e, axis=0) / n_samples
 		print(group_probs) # FIXME remove diagnostic 
-		if np.isnan(np.sum(group_probs)):
-			raise ValueError('group_probs contains NaNs')
 
 		# variant probabilities update
 		for alpha in range(K): # this can also be parallelized
