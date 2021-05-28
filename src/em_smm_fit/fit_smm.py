@@ -79,7 +79,6 @@ def _encode_haplotypes(
 				haplos[:, haplos_idx] == 1, idx, haplos_encoded[:,k]
 			)
 			haplos_encoded[:,k] = res
-			print(res)
 			haplos_idx += 1
 	return haplos_encoded
 
