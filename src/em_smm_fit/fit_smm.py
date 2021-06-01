@@ -52,11 +52,13 @@ def _em_loop(
 				denominator = np.sum([group_probs * log_probs_alpha])
 			else:
 				denominator = np.log(np.sum(group_probs * np.exp(log_probs_alpha)))
-			new_group_e = (group_probs * log_probs_alpha) - denominator
+			new_group_e = (np.log(group_probs) * log_probs_alpha) - denominator
+
 			if np.isinf(np.max(new_group_e)):
 				raise ValueError('Infinite expectation')
 			else:
 				group_e[r,:] = np.exp(new_group_e)
+
 		group_probs = np.sum(group_e, axis=0) / n_samples
 		print(group_probs) # FIXME remove diagnostic 
 
