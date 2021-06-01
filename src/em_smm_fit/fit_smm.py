@@ -16,6 +16,9 @@ parser.add_argument(
 parser.add_argument(
 	'-K', type=int, default=10, help="Number of components of mixture model"
 )
+parser.add_argument(
+	'--logsum_approx', type=bool, default=False, help="Approximate log of sum with convexity lower bound in high-dimensional cases"
+)
 rng = np.random.default_rng(42)
 
 @jit(nopython=True, fastmath=True)
@@ -29,36 +32,36 @@ def _em_loop(
 	group_probs: np.ndarray, 
 	variant_probs: np.ndarray, 
 	haplotypes: np.ndarray,
+	logsum_approx: bool=False,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:	
 
 	flattened_offset = np.arange(0, n_loci*2, 2)
 
 	for i in range(n_iterations):
 		print('Starting iteration ', i, ' /', n_iterations, '\n')
-		for r in range(n_samples): # this can be parallelized
-			log_variant_probs = np.log(variant_probs) # NOTE might cause problems for variant probs that are 0
+		for r in range(n_samples):
+			log_variant_probs = np.log(variant_probs) # NOTE might cause problems for variant probs that are 0?
 			log_probs_alpha = np.array([
-				np.log(group_probs[alpha]) + np.sum(
-					log_variant_probs[alpha].flatten()[flattened_offset + haplotypes[r]]
-				) # workaround for not being able to use more than one advanced index in numba
+				np.sum(log_variant_probs[alpha].flatten()[flattened_offset + haplotypes[r]]) 
+				# workaround for not being able to use more than one advanced index in numba
 				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
 				for alpha in range(K)
 			]) 
-			new_group_e = np.array([
-				log_probs_alpha[alpha] - np.log(np.sum(np.exp(log_probs_alpha))) # NOTE this is probably where the NaNs propagate
-				for alpha in range(K)
-			])
+			denominator = 0
+			if logsum_approx: # use convex approximation to log of sum 
+				denominator = np.sum([group_probs * log_probs_alpha])
+			else:
+				denominator = np.log(np.sum(group_probs * np.exp(log_probs_alpha)))
+			new_group_e = (group_probs * log_probs_alpha) - denominator
 			if np.isinf(np.max(new_group_e)):
-				raise ValueError('infinite expectation')
+				raise ValueError('Infinite expectation')
 			else:
 				group_e[r,:] = np.exp(new_group_e)
-		# NOTE if paralellizing, might need to be careful about assigning to group_e,
-		# can trigger a race condition
 		group_probs = np.sum(group_e, axis=0) / n_samples
 		print(group_probs) # FIXME remove diagnostic 
 
 		# variant probabilities update
-		for alpha in range(K): # this can also be parallelized
+		for alpha in range(K):
 			norm_ct = group_probs[alpha] * n_samples
 			for k in range(n_loci):
 				for i in range(n_variants_pos[k]): # ignore placeholders in array
@@ -84,7 +87,7 @@ def _encode_haplotypes(
 	return haplos_encoded
 
 def fit_em_smm(
-	variants_vcf: str, n_iterations: int, K: int
+	variants_vcf: str, n_iterations: int, K: int, log_sum_approx: bool,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
@@ -134,6 +137,7 @@ if __name__ == '__main__':
 		variants_vcf=args.input,
 		n_iterations=args.n_iterations,
 		K=args.K,
+		log_sum_approx=args.logsum_approx,
 	)
 	np.save(os.path.join(args.output, 'group_probs.npy'), group_probs, allow_pickle=False)
 	np.save(os.path.join(args.output, 'group_e.npy'), group_e, allow_pickle=False)
