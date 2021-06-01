@@ -47,9 +47,11 @@ def _em_loop(
 				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
 				for alpha in range(K)
 			]) 
+			if r < 6:
+				print(log_probs_alpha)
 			denominator = 0
 			if logsum_approx: # use convex approximation to log of sum 
-				denominator = np.sum([group_probs * log_probs_alpha])
+				denominator = np.sum(group_probs * log_probs_alpha)
 			else:
 				denominator = np.log(np.sum(group_probs * np.exp(log_probs_alpha)))
 			new_group_e = (np.log(group_probs) * log_probs_alpha) - denominator
@@ -60,8 +62,6 @@ def _em_loop(
 				group_e[r,:] = np.exp(new_group_e)
 
 		group_probs = np.sum(group_e, axis=0) / n_samples
-		print(group_probs) # FIXME remove diagnostic 
-
 		# variant probabilities update
 		for alpha in range(K):
 			norm_ct = group_probs[alpha] * n_samples
@@ -69,7 +69,6 @@ def _em_loop(
 				for i in range(n_variants_pos[k]): # ignore placeholders in array
 					variant_samples = np.where(haplotypes[:,k] == i, True, False) # find samples with given variant
 					variant_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
-					# NOTE same potential race condition issue here
 	return (group_probs, group_e, variant_probs)
 
 @jit(nopython=True)
