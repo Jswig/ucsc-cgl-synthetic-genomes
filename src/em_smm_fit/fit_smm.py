@@ -20,7 +20,6 @@ parser.add_argument(
 	'--logsum_approx', type=bool, default=False, help="Approximate log of sum with convexity lower bound in high-dimensional cases"
 )
 rng = np.random.default_rng(42)
-
 @jit(nopython=True, fastmath=True)
 def _em_loop(
 	n_iterations: int,
@@ -32,11 +31,11 @@ def _em_loop(
 	group_probs: np.ndarray, 
 	variant_probs: np.ndarray, 
 	haplotypes: np.ndarray,
-	logsum_approx: bool=False,
+	logsum_approx: bool,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:	
 
 	flattened_offset = np.arange(0, n_loci*2, 2)
-
+ 
 	for i in range(n_iterations):
 		print('Starting iteration ', i, ' /', n_iterations, '\n')
 		for r in range(n_samples):
@@ -47,21 +46,22 @@ def _em_loop(
 				# normally would use variant_probs[alpha, np.arange(n_loci), haplos[r]]
 				for alpha in range(K)
 			]) 
-			if r < 6:
-				print(log_probs_alpha)
 			denominator = 0
 			if logsum_approx: # use convex approximation to log of sum 
 				denominator = np.sum(group_probs * log_probs_alpha)
 			else:
-				denominator = np.log(np.sum(group_probs * np.exp(log_probs_alpha)))
-			new_group_e = (np.log(group_probs) * log_probs_alpha) - denominator
-
+				denominator = np.log(np.sum(group_probs * np.exp(log_probs_alpha)))     
+			new_group_e = np.log(group_probs) + log_probs_alpha - denominator
+			new_group_e = np.exp(new_group_e)
+			if logsum_approx: # rescale to sum up to 1 if using convex approx
+				new_group_e = new_group_e / np.sum(new_group_e)
 			if np.isinf(np.max(new_group_e)):
 				raise ValueError('Infinite expectation')
 			else:
-				group_e[r,:] = np.exp(new_group_e)
+				group_e[r,:] = new_group_e
 
 		group_probs = np.sum(group_e, axis=0) / n_samples
+		print('Group probabilities: ', group_probs)
 		# variant probabilities update
 		for alpha in range(K):
 			norm_ct = group_probs[alpha] * n_samples
@@ -69,6 +69,7 @@ def _em_loop(
 				for i in range(n_variants_pos[k]): # ignore placeholders in array
 					variant_samples = np.where(haplotypes[:,k] == i, True, False) # find samples with given variant
 					variant_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
+		print('Variant probabilities: ', variant_probs[:2, :10])    
 	return (group_probs, group_e, variant_probs)
 
 @jit(nopython=True)
@@ -88,7 +89,7 @@ def _encode_haplotypes(
 	return haplos_encoded
 
 def fit_em_smm(
-	variants_vcf: str, n_iterations: int, K: int, log_sum_approx: bool,
+	variants_vcf: str, n_iterations: int, K: int, logsum_approx: bool,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
@@ -107,7 +108,6 @@ def fit_em_smm(
 		.count()['REF']
 		.values) + 1
 	max_n_variants = np.sort(n_variants_pos)[-1]
-
 	n_loci = len(variants['POS'].unique())
 	n_samples = haplos.shape[0] 
 
@@ -130,6 +130,7 @@ def fit_em_smm(
 		group_probs,
 		variant_probs,
 		haplos,
+		logsum_approx,
 	)
 	
 if __name__ == '__main__':
@@ -138,7 +139,7 @@ if __name__ == '__main__':
 		variants_vcf=args.input,
 		n_iterations=args.n_iterations,
 		K=args.K,
-		log_sum_approx=args.logsum_approx,
+		logsum_approx=args.logsum_approx,
 	)
 	np.save(os.path.join(args.output, 'group_probs.npy'), group_probs, allow_pickle=False)
 	np.save(os.path.join(args.output, 'group_e.npy'), group_e, allow_pickle=False)
