@@ -71,5 +71,6 @@ steps:
     "--n_iterations",
     "2",
     "-K",
-    "6"
+    "6",
+    '--logsum_approx'
   ]
