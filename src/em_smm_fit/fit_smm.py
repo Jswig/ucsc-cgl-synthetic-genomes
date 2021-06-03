@@ -118,8 +118,7 @@ def fit_em_smm(
 	rng = np.random.default_rng(seed)
 	group_e_ini = rng.random(size=(n_samples, K))
 	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
-	group_ini = rng.random(size=6)
-	group_probs = group_ini / np.sum(group_ini) # make this a probability vector
+	group_probs = np.full(6, 1/K) # make this a probability vector
 	variant_ini = rng.random(size=(K, n_loci, max_n_variants)) 
 	variant_probs = variant_ini / np.sum(variant_ini, axis=2, keepdims=1)
 	# TODO: add step filtering this to correct number of variants
