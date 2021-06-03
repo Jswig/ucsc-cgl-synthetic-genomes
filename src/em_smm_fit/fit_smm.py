@@ -5,26 +5,21 @@ import os
 from numba import jit
 from typing import Tuple
 
-parser = argparse.ArgumentParser(
-	description='fit symmetric mixture model'
-)
+parser = argparse.ArgumentParser(description='fit symmetric mixture model')
 parser.add_argument('input', help='Input VCF file')
 parser.add_argument('output', help='Output path')
 parser.add_argument(
-	'--n_iterations', type=int, default=20, help="Number of iterations of EM algorithm"
+	'--n_iterations', type=int, default=20, help='Number of iterations of EM algorithm'
 )
+parser.add_argument('-K', type=int, default=10, help='Number of components of mixture model')
 parser.add_argument(
-	'-K', type=int, default=10, help="Number of components of mixture model"
-)
-parser.add_argument(
-	'--use_approx', dest='logsum_approx', action='store_true', help="Approximate log of sum with convexity lower bound in high-dimensional cases"
+	'--use_approx', dest='logsum_approx', action='store_true', help='Approximate log of sum with convexity lower bound in high-dimensional cases'
 )
 parser.add_argument(
 	'--no_approx', dest='logsum_approx', action='store_false', help='Do no approximate log of a sum wiht convexity lower bound'
 )
 parser.set_defaults(logsum_approx=False)
-rng = np.random.default_rng(21)
-
+parser.add_argument('--seed', type=int, default=42, help='Random seed')
 
 @jit(nopython=True, fastmath=True)
 def _em_loop(
@@ -96,7 +91,7 @@ def _encode_haplotypes(
 	return haplos_encoded
 
 def fit_em_smm(
-	variants_vcf: str, n_iterations: int, K: int, logsum_approx: bool,
+	variants_vcf: str, n_iterations: int, K: int, seed: int, logsum_approx: bool,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 	variants = (allel
 		.vcf_to_dataframe(variants_vcf, fields=['POS', 'REF', 'ALT'])
@@ -117,10 +112,10 @@ def fit_em_smm(
 	max_n_variants = np.sort(n_variants_pos)[-1]
 	n_loci = len(variants['POS'].unique())
 	n_samples = haplos.shape[0] 
-
 	haplos = _encode_haplotypes(variants['POS'].values, haplos, n_samples, n_loci)
 
    	# em initialization
+	rng = np.random.default_rng(seed)
 	group_e_ini = rng.random(size=(n_samples, K))
 	group_e = group_e_ini / np.sum(group_e_ini, axis=1, keepdims=1)
 	group_ini = rng.random(size=6)
@@ -146,6 +141,7 @@ if __name__ == '__main__':
 		variants_vcf=args.input,
 		n_iterations=args.n_iterations,
 		K=args.K,
+		seed=args.seed,
 		logsum_approx=args.logsum_approx,
 	)
 	np.save(os.path.join(args.output, 'group_probs.npy'), group_probs, allow_pickle=False)
