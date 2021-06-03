@@ -17,9 +17,15 @@ parser.add_argument(
 	'-K', type=int, default=10, help="Number of components of mixture model"
 )
 parser.add_argument(
-	'--logsum_approx', type=bool, default=False, help="Approximate log of sum with convexity lower bound in high-dimensional cases"
+	'--use_approx', dest='logsum_approx', action='store_true', help="Approximate log of sum with convexity lower bound in high-dimensional cases"
 )
-rng = np.random.default_rng(42)
+parser.add_argument(
+	'--no_approx', dest='logsum_approx', action='store_false', help='Do no approximate log of a sum wiht convexity lower bound'
+)
+parser.set_defaults(logsum_approx=False)
+rng = np.random.default_rng(21)
+
+
 @jit(nopython=True, fastmath=True)
 def _em_loop(
 	n_iterations: int,
