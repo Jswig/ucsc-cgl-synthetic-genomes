@@ -74,3 +74,5 @@ steps:
     "6",
     '--use_approx'
   ]
+  options:
+    user: 30100
