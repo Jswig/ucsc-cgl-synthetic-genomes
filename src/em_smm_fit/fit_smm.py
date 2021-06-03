@@ -68,7 +68,8 @@ def _em_loop(
 			for k in range(n_loci):
 				for i in range(n_variants_pos[k]): # ignore placeholders in array
 					variant_samples = np.where(haplotypes[:,k] == i, True, False) # find samples with given variant
-					variant_probs[alpha, k, i] = np.sum(group_e[variant_samples, alpha]) / norm_ct
+					new_prob = np.sum(group_e[variant_samples, alpha]) / norm_ct
+					variant_probs[alpha, k, i] = max(new_prob, 10e-12) # prevent issues from taking log(0)
 		print('Variant probabilities: ', variant_probs[:2, :10])    
 	return (group_probs, group_e, variant_probs)
 
