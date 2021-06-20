@@ -25,7 +25,7 @@ def _generate_samples(
     group_probs: np.ndarray,
     variant_probs: np.ndarray,
     seed: int,
-) -> Dict[int, np.array]:
+) -> np.array:
     samples = []
     
     rng = np.random.default_rng(seed)
@@ -35,8 +35,6 @@ def _generate_samples(
     variant_codes = np.arange(max_n_variants)
     n_groups = len(group_probs)
 
-    haplotypes = np.full((n_samples*2, n_loci), 0)
-
     groups = rng.choice(
         np.arange(0, len(group_probs)),
         size=n_samples*2,
@@ -44,21 +42,29 @@ def _generate_samples(
     )
     group_counts = [
         np.count_nonzero(groups == i)
-        for i in range(K)
+        for i in range(n_groups)
     ] 
 
     # iterate over groups, generating appropriate number of samples from 
     # each group
+    haplotypes = np.full((n_samples*2, n_loci), 0)
+    idx = 0 # start at the beginning of the locus
     for alpha in range(n_groups):
         for k in range(n_loci):
-            pass
+            haplotypes[k, idx:(idx+group_counts[alpha])] = rng.choice(
+                np.arange(max_n_variants),
+                size=group_counts[alpha],
+                p=variant_probs[alpha, k],
+            )
+        idx += group_counts[alpha]
+
+    # shuffle columns of resulting array (not really necessary, just prevents it 
+    # from looking weird
+    haplotypes = np.transpose(rng.shuffle(np.transpose(haplotypes)))
 
     # NOTE: this returns an array of samples. Maybe convert to a dict at a 
     # later point for compatibility with existing VCF writing code 
-
-    # shuffle columns of resulting array (not really necessary, just prevents it 
-    # from looking weird)
-
+    return haplotypes
 
 if __name__ == '__main__':
     args = parser.parse_args()

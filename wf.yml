@@ -31,7 +31,7 @@ steps:
     "output/models/gan_latent_dim_25",
     "--epochs",
     "500",
-    "--batch_size",
+    "--batch_size",/EEEEEEEÆ
     "8",
     "--latent_dim",
     "25",
@@ -72,7 +72,7 @@ steps:
     "2",
     "-K",
     "6",
-    '--use_approx'
+    "--seed",
+    "42",
+    "--use_approx"
   ]
-  options:
-    user: 30100
