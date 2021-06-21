@@ -5,6 +5,8 @@ import os
 from numba import jit
 from typing import Tuple
 
+from src.lib.math import logsum_approx
+
 parser = argparse.ArgumentParser(description='fit symmetric mixture model')
 parser.add_argument('input', help='Input VCF file')
 parser.add_argument('output', help='Output path')
@@ -48,8 +50,8 @@ def _em_loop(
 				for alpha in range(K)
 			]) 
 			denominator = 0
-			if logsum_approx: # use convex approximation to log of sum 
-				denominator = np.sum(group_probs * log_probs_alpha)
+			if logsum_approx: # use approximation for log of a sum
+				denominator = logsum_approx(group_probs * log_probs_alpha)
 			else:
 				denominator = np.log(np.sum(group_probs * np.exp(log_probs_alpha)))     
 			new_group_e = np.log(group_probs) + log_probs_alpha - denominator
